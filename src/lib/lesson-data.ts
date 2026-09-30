@@ -8,41 +8,42 @@ export const subjects = [
 export const grades = Array.from({length: 11}, (_, i) => `${i + 1} класс`);
 export const referenceAvailability: Record<string, Record<string, boolean>> = { 'Математика': { '6 класс': true } };
 export const schoolCalendar = {
-  schoolYear: '2026/2027', startDate: '2026-09-01',
+  schoolYear: '2026/2027', startDate: '2026-09-01', endDate: '2027-05-26', lessonsPerWeek: 5, maximumLessons: 170,
   vacations: [
-    {start: '2026-10-26', end: '2026-11-02'},
-    {start: '2026-12-30', end: '2027-01-10'},
-    {start: '2027-03-22', end: '2027-03-28'},
+    {start: '2026-10-26', end: '2026-11-03', grade: 'all'},
+    {start: '2026-12-31', end: '2027-01-10', grade: 'all'},
+    {start: '2027-02-15', end: '2027-02-21', grade: '1 класс'},
+    {start: '2027-03-27', end: '2027-04-04', grade: 'all'},
+    {start: '2027-05-27', end: '2027-08-31', grade: 'all'},
   ],
 };
 const day = 86400000;
 const utc = (s: string) => { const [y=2026,m=1,d=1] = s.split('-').map(Number); return Date.UTC(y,m-1,d); };
-const monday = (timestamp: number) => {
-  const date = new Date(timestamp);
-  return timestamp - ((date.getUTCDay() + 6) % 7) * day;
-};
-export function academicPosition(date: Date) {
+export function academicPosition(date: Date, grade = '6 класс') {
   const today = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
   const start = utc(schoolCalendar.startDate);
-  const startMonday = monday(start);
-  let currentWeek = 1;
-  if (today > start) {
-    for (let cursor = startMonday + 7*day; cursor <= monday(today); cursor += 7*day) {
-      const paused = schoolCalendar.vacations.some(v => cursor >= monday(utc(v.start)) && cursor <= monday(utc(v.end)));
-      if (!paused) currentWeek++;
-    }
+  const end = utc(schoolCalendar.endDate);
+  const onVacation = (timestamp: number) => schoolCalendar.vacations.some(v =>
+    (v.grade === 'all' || v.grade === grade) && timestamp >= utc(v.start) && timestamp <= utc(v.end));
+  const isSchoolDay = (timestamp: number) => {
+    const weekday = new Date(timestamp).getUTCDay();
+    return weekday >= 1 && weekday <= 5 && !onVacation(timestamp);
+  };
+  let taught = 0;
+  for (let cursor = start; cursor <= Math.min(today, end); cursor += day) {
+    if (isSchoolDay(cursor)) taught++;
   }
-  currentWeek = Math.max(1, Math.min(34, currentWeek));
-  const weekday = (new Date(today).getUTCDay() + 6) % 7;
-  return { week: currentWeek, expectedLesson: Math.min(170, (currentWeek-1)*5 + Math.min(5, weekday+1)) };
+  const expectedLesson = Math.max(1, Math.min(schoolCalendar.maximumLessons, taught));
+  const week = Math.min(34, Math.ceil(expectedLesson / schoolCalendar.lessonsPerWeek));
+  return { week, expectedLesson, isVacation: onVacation(today), isSchoolDay: today >= start && today <= end && isSchoolDay(today) && taught <= schoolCalendar.maximumLessons };
 }
-export function rankLessonsByCurrentDate(date: Date) {
-  const {week, expectedLesson} = academicPosition(date);
+export function rankLessonsByCurrentDate(date: Date, grade = '6 класс') {
+  const {week, expectedLesson, isVacation, isSchoolDay} = academicPosition(date, grade);
   const sort = (a: Lesson,b: Lesson) => Math.abs(a.week-week)-Math.abs(b.week-week) || Math.abs(a.lessonNumber-expectedLesson)-Math.abs(b.lessonNumber-expectedLesson) || a.lessonNumber-b.lessonNumber;
   return {
     current: lessons.filter(l => l.week === week).sort(sort),
     nearby: lessons.filter(l => l.week !== week && Math.abs(l.week-week) <= 1).sort(sort),
     all: lessons.filter(l => Math.abs(l.week-week) > 1).sort((a,b) => a.lessonNumber-b.lessonNumber),
-    week, expectedLesson,
+    week, expectedLesson, isVacation, isSchoolDay,
   };
 }
