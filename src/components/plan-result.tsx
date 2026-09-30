@@ -9,14 +9,15 @@ function RichText({ children, className = '', definitions = false }: { children:
   const normalized = children
     .replace(/\\\(([\s\S]*?)\\\)/g, (_match, math: string) => `$${math}$`)
     .replace(/\\\[([\s\S]*?)\\\]/g, (_match, math: string) => `$$\n${math}\n$$`);
-  return <div className={`result-rich ${className}`}><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} skipHtml components={definitions ? {
+  return <div className={`result-rich ${className}`}><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} skipHtml components={{
+    table: ({ children: contents }) => <div className="result-table-scroll"><table>{contents}</table></div>,
     p: ({ children: contents }) => {
       const first = Array.isArray(contents) ? contents[0] : contents;
       const label = isValidElement<{ children?: ReactNode }>(first) && first.type === 'strong' ? first.props.children : null;
-      const isDefinition = typeof label === 'string' && /[:.!?]$/.test(label.trim());
+      const isDefinition = definitions && typeof label === 'string' && /[:.!?]$/.test(label.trim());
       return <p className={isDefinition ? 'result-definition' : undefined}>{contents}</p>;
     },
-  } : undefined}>{normalized}</ReactMarkdown></div>;
+  }}>{normalized}</ReactMarkdown></div>;
 }
 
 function withoutTitle(text: string, title: string) {
@@ -76,7 +77,7 @@ export function PlanResult({ plan }: { plan: Plan }) {
     <ResultSection id="section-3" title="Планируемые результаты">
       {resultRows.length ? <div className="result-rows">{resultRows.map((row, i) => {
         const label = (row[0] ?? '').replace(/\*\*/g, '');
-        const metacognitive = label.match(/^Метапредметные\s*[—–-]\s*(.+)$/i);
+        const metacognitive = label.match(/^Метапредметные(?:\s*[—–-]\s*|\s+)(.+)$/i);
         return <div className="result-row" key={i}><h3>{metacognitive ? (resultRows.slice(0, i).some(previous => /^Метапредметные/i.test(previous[0] ?? '')) ? null : 'Метапредметные') : label}</h3><div>{metacognitive && <h4 className="result-subgroup">{metacognitive[1]}</h4>}<ResultList text={row.slice(1).join(' | ')} /></div></div>;
       })}</div> : <RichText>{plan.plannedResults.table}</RichText>}
     </ResultSection>
