@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
-import { ArrowLeft, BookOpen, Check, ChevronDown, Clipboard, Download, FileJson, Search, Sparkles } from 'lucide-react';
+import { ArrowLeft, BookOpen, Check, ChevronDown, Clipboard, Download, FileJson, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -67,7 +67,7 @@ function Index() {
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState(false);
   const [copied,setCopied]=useState(false);
-  const ranked=useMemo(()=>rankLessonsByCurrentDate(new Date()),[]);
+  const ranked=useMemo(()=>rankLessonsByCurrentDate(new Date(),grade),[grade]);
   const available=Boolean(referenceAvailability[subject]?.[grade]);
   const markdown=plan ? planToMarkdown(plan) : '';
   async function createPlan() {
@@ -77,17 +77,13 @@ function Index() {
     catch (e) { console.error(e);setError(true); }
     finally {setLoading(false); }
   }
-  return <div className="min-h-screen bg-background">
-    <header className="border-b bg-card"><div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 md:px-10">
-      <div className="flex items-center gap-3"><span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground"><BookOpen size={19}/></span><span className="font-display text-base font-extrabold text-foreground">Урок по плану</span></div>
-      <span className="hidden text-xs font-medium text-muted-foreground sm:block">ТЕМАТИЧЕСКОЕ ПЛАНИРОВАНИЕ</span>
-    </div></header>
-    {!plan && !loading && <main className="mx-auto max-w-7xl px-5 pb-20 pt-12 md:px-10 md:pt-20">
-      <div className="max-w-3xl"><div className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase text-primary"><span className="h-px w-7 bg-primary"/> Планирование урока</div>
-        <h1 className="font-display text-4xl font-extrabold leading-tight md:text-5xl">Создать план урока</h1>
-        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">Выберите урок из тематического планирования — структура и содержание плана будут подготовлены автоматически.</p>
-      </div>
-      <section className="mt-12 border-y border-border py-9 md:mt-16" aria-label="Выбор урока">
+  return <div className="app-frame min-h-screen bg-background">
+    <div className="app-shell">
+    <header className="shell-header"><div className="flex items-center gap-3"><span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground"><BookOpen size={19}/></span><span className="font-display text-base font-bold text-foreground">Урок по плану</span></div><span className="hidden text-xs font-medium text-muted-foreground sm:block">ТЕМАТИЧЕСКОЕ ПЛАНИРОВАНИЕ</span></header>
+    <div className="shell-steps" aria-label="Этапы работы"><span className={plan ? 'step-complete' : 'step-active'}><span className="step-dot">{plan ? '✓' : '1'}</span>Выбор урока</span><span className="step-line"/><span className={plan ? 'step-active' : 'step-future'}><span className="step-dot">2</span>План урока</span></div>
+    {!plan && !loading && <main className="work-surface px-5 pb-16 pt-9 md:px-9 md:pt-11">
+      <div className="max-w-3xl"><h1 className="font-display text-3xl font-bold leading-tight md:text-4xl">Создать план урока</h1><p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">Выберите урок из тематического планирования — структура и содержание плана будут подготовлены автоматически.</p></div>
+      <section className="mt-9 border-y border-border py-7" aria-label="Выбор урока">
         <div className="grid gap-5 md:grid-cols-[1fr_0.7fr_1.65fr]">
           <div><label className="mb-2 block text-sm font-semibold">Предмет</label><Select value={subject} onValueChange={v=>{setSubject(v);setSelected(undefined);setError(false);}}><SelectTrigger className="h-12 bg-card"><SelectValue /></SelectTrigger><SelectContent className="max-h-80">{subjects.map(s=><SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
           <div><label className="mb-2 block text-sm font-semibold">Класс</label><Select value={grade} onValueChange={v=>{setGrade(v);setSelected(undefined);setError(false);}}><SelectTrigger className="h-12 bg-card"><SelectValue /></SelectTrigger><SelectContent>{grades.map(g=><SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent></Select></div>
@@ -98,15 +94,15 @@ function Index() {
         <div className="mt-8 flex flex-wrap items-center gap-5"><Button size="lg" disabled={!available || !selected} onClick={createPlan} className="h-12 px-6"><Sparkles size={17}/>Сформировать план урока</Button><span className="text-sm text-muted-foreground">{selected ? `${selected.hours*45} минут · Математика · 6 класс` : 'Выберите предмет, класс и тему урока.'}</span></div>
         {error && <div role="alert" className="mt-5 flex flex-wrap items-center gap-3 text-sm text-destructive">Не удалось сформировать план. Попробуйте ещё раз.<Button variant="outline" size="sm" onClick={createPlan}>Повторить</Button></div>}
       </section>
-      <div className="mt-10 grid gap-8 border-b pb-10 md:grid-cols-[1fr_auto] md:items-center"><div><p className="text-xs font-semibold uppercase text-muted-foreground">В справочнике</p><p className="mt-2 font-display text-2xl font-bold">170 уроков математики</p><p className="mt-1 text-sm text-muted-foreground">Все темы доступны для выбора независимо от даты.</p></div><div className="flex items-center gap-2 text-sm text-muted-foreground"><span className="size-2 rounded-full bg-primary"/> Учебная неделя {ranked.week} · 2026/2027</div></div>
-      {available && <section className="mt-10"><div className="mb-5 flex items-center justify-between gap-4"><div><h2 className="font-display text-xl font-bold">Актуально по плану</h2><p className="mt-1 text-sm text-muted-foreground">Темы текущей учебной недели</p></div><span className="text-xs text-muted-foreground">{ranked.current.length} уроков</span></div><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{ranked.current.map(l=><Button key={l.lessonNumber} variant="outline" onClick={()=>setSelected(l)} className={`h-auto min-h-28 w-full items-start justify-start whitespace-normal border bg-card p-5 text-left shadow-none transition-colors hover:border-primary/40 ${selected?.lessonNumber===l.lessonNumber ? 'border-primary bg-secondary' : ''}`}><div className="flex w-full flex-col items-start gap-2"><span className="text-xs font-semibold text-primary">УРОК {l.lessonNumber} <span className="text-muted-foreground">· {l.week} НЕДЕЛЯ</span></span><span className="line-clamp-2 text-sm font-semibold leading-relaxed text-foreground">{l.lessonTopic}</span></div></Button>)}</div></section>}
+       <div className="mt-8 grid gap-5 border-b pb-8 md:grid-cols-[1fr_auto] md:items-center"><div><p className="text-xs font-semibold uppercase text-muted-foreground">В справочнике</p><p className="mt-2 font-display text-xl font-bold">170 уроков математики</p></div><div className="flex items-center gap-2 text-sm text-muted-foreground"><span className="size-2 rounded-full bg-primary"/> {ranked.isVacation ? 'Каникулы' : 'Учебная неделя ' + ranked.week} · 2026/2027</div></div>
+      {available && !ranked.isVacation && <section className="mt-10"><div className="mb-5 flex items-center justify-between gap-4"><div><h2 className="font-display text-xl font-bold">Актуально по плану</h2><p className="mt-1 text-sm text-muted-foreground">Темы текущей учебной недели</p></div><span className="text-xs text-muted-foreground">{ranked.current.length} уроков</span></div><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{ranked.current.map(l=><Button key={l.lessonNumber} variant="outline" onClick={()=>setSelected(l)} className={`h-auto min-h-28 w-full items-start justify-start whitespace-normal border bg-card p-5 text-left shadow-none transition-colors hover:border-primary/40 ${selected?.lessonNumber===l.lessonNumber ? 'border-primary bg-secondary' : ''}`}><div className="flex w-full flex-col items-start gap-2"><span className="text-xs font-semibold text-primary">УРОК {l.lessonNumber} <span className="text-muted-foreground">· {l.week} НЕДЕЛЯ</span></span><span className="line-clamp-2 text-sm font-semibold leading-relaxed text-foreground">{l.lessonTopic}</span></div></Button>)}</div></section>}
     </main>}
-    {loading && <main className="mx-auto max-w-5xl px-5 py-14 md:px-10"><div className="mb-8 flex items-center gap-3 text-primary"><Sparkles className="animate-pulse"/><span className="font-display text-xl font-bold">Формируем план урока…</span></div><Skeleton className="mb-4 h-10 w-3/4"/><Skeleton className="mb-10 h-5 w-1/2"/>{Array.from({length:5},(_,i)=><div key={i} className="mb-10"><Skeleton className="mb-5 h-7 w-1/3"/><Skeleton className="mb-3 h-4 w-full"/><Skeleton className="mb-3 h-4 w-5/6"/><Skeleton className="h-4 w-2/3"/></div>)}</main>}
-    {plan && <main className="mx-auto max-w-7xl px-5 pb-24 pt-8 md:px-10"><Button variant="ghost" className="-ml-3 text-muted-foreground" onClick={()=>{setPlan(undefined);setCopied(false);}}><ArrowLeft/>Изменить урок</Button>
-      <div className="mt-8 border-b pb-8"><p className="mb-3 text-xs font-bold uppercase text-primary">Математика · 6 класс · Урок {plan.lesson.number}</p><h1 className="max-w-4xl font-display text-3xl font-extrabold leading-tight md:text-4xl">{plan.lesson.title}</h1><div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-muted-foreground"><span>{plan.lesson.lessonType}</span><span>·</span><span>{plan.lesson.durationMinutes} минут</span></div>
+     {loading && <main className="work-surface px-5 py-12 md:px-9"><div className="mb-8 flex items-center gap-3 text-primary"><Sparkles className="animate-pulse"/><span className="font-display text-xl font-bold">Формируем план урока…</span></div><Skeleton className="mb-4 h-10 w-3/4"/><Skeleton className="mb-10 h-5 w-1/2"/>{Array.from({length:5},(_,i)=><div key={i} className="mb-10"><Skeleton className="mb-5 h-7 w-1/3"/><Skeleton className="mb-3 h-4 w-full"/><Skeleton className="mb-3 h-4 w-5/6"/><Skeleton className="h-4 w-2/3"/></div>)}</main>}
+     {plan && <main className="work-surface px-5 pb-20 pt-7 md:px-9"><Button variant="ghost" className="-ml-3 text-muted-foreground" onClick={()=>{setPlan(undefined);setCopied(false);}}><ArrowLeft/>Изменить урок</Button>
+       <div className="mt-5 border-b pb-6"><h1 className="max-w-4xl font-display text-3xl font-bold leading-tight md:text-4xl">{plan.lesson.title}</h1><p className="mt-2 text-sm text-muted-foreground">Математика · 6 класс · {plan.lesson.lessonType} · {plan.lesson.section} · Урок {plan.lesson.number} · {plan.lesson.durationMinutes} мин</p>
         <div className="mt-7 flex flex-wrap gap-2"><Button variant="outline" onClick={async()=>{await navigator.clipboard.writeText(markdown);setCopied(true);setTimeout(()=>setCopied(false),2000);}}>{copied?<Check/>:<Clipboard/>}{copied?'Скопировано':'Скопировать'}</Button><Button variant="outline" onClick={()=>download(`urok-${plan.lesson.number}.md`,markdown,'text/markdown;charset=utf-8')}><Download/>Скачать Markdown</Button><Button variant="outline" onClick={()=>download(`urok-${plan.lesson.number}.json`,JSON.stringify(plan,null,2),'application/json;charset=utf-8')}><FileJson/>Скачать JSON</Button></div>
-      </div><div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_230px]"><article className="plan-prose min-w-0 pt-6"><Markdown content={markdown}/></article><aside className="hidden lg:block"><nav aria-label="Содержание плана" className="sticky top-8 mt-10 border-l pl-5"><p className="mb-4 text-xs font-bold uppercase text-muted-foreground">Содержание</p>{sections.map((s,i)=><a key={s} href={`#section-${i+1}`} className="mb-3 block text-sm text-muted-foreground transition-colors hover:text-primary">{s}</a>)}</nav></aside></div>
+       </div><div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_190px]"><article className="plan-prose min-w-0 pt-2"><Markdown content={markdown}/></article><aside className="hidden lg:block"><nav aria-label="Содержание плана" className="sticky top-8 mt-10"><p className="mb-3 text-xs font-bold uppercase text-muted-foreground">Содержание</p>{sections.map((s,i)=><a key={s} href={`#section-${i+1}`} className="mb-2 block text-sm text-foreground transition-colors hover:text-primary">{s}</a>)}</nav></aside></div>
     </main>}
-    <footer className="border-t bg-card"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-5 py-6 text-xs text-muted-foreground md:px-10"><span>Урок по плану</span><span>Тематический справочник · Математика, 6 класс</span></div></footer>
+    </div>
   </div>;
 }
