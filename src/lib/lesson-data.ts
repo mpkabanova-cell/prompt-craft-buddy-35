@@ -42,7 +42,7 @@ export function rankLessonsByCurrentDate(date: Date, grade = '6 класс') {
   const current = isVacation ? [] : lessons.filter(l => l.week === week).sort((a,b) => a.lessonNumber-b.lessonNumber);
   return {
     current,
-    all: lessons.filter(l => !current.some(item => item.lessonNumber === l.lessonNumber)).sort((a,b) => a.lessonNumber-b.lessonNumber),
+    all: [...lessons].sort((a,b) => a.lessonNumber-b.lessonNumber),
     week, expectedLesson, isVacation, isSchoolDay,
   };
 }

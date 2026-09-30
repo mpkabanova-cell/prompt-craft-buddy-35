@@ -35,13 +35,15 @@ export function createLessonGateway(apiKey: string) {
         while (true) {
           const { value, done } = await reader.read();
           if (done) break;
-          buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, '\n');
+          buffer += decoder.decode(value, { stream: true });
+          buffer = buffer.replace(/\r\n/g, '\n');
           let boundary: number;
           while ((boundary = buffer.indexOf('\n\n')) >= 0) {
             handleFrame(buffer.slice(0, boundary));
             buffer = buffer.slice(boundary + 2);
           }
         }
+        buffer += decoder.decode();
         if (buffer.trim()) handleFrame(buffer);
       } finally { reader.releaseLock(); }
       if (denied) throw new Error('Модель отказалась сформировать план урока');
