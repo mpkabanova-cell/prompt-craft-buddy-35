@@ -4,7 +4,7 @@ export type Lesson = (typeof reference)[number];
 export const lessons: Lesson[] = reference;
 export function lessonDisplayTitle(lesson: Lesson): string {
   return lesson.lessonType === 'урок контроля'
-    ? `${lesson.lessonTopic} по разделу «${lesson.unitTopic}»`
+    ? `${lesson.lessonTopic} «${lesson.unitTopic}»`
     : lesson.lessonTopic;
 }
 export const subjects = [
