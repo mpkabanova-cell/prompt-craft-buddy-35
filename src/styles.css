@@ -40,16 +40,14 @@
 @layer components {
   .app-frame { padding: 42px 24px 32px; }
   .app-shell { width: min(1400px, 100%); margin: 0 auto; background: var(--color-background); padding: 16px 18px 0; min-height: calc(100vh - 74px); }
-  .shell-header { min-height: 55px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; }
-  .shell-steps { display: flex; align-items: center; gap: 14px; min-height: 54px; padding: 0 14px; font-size: 14px; white-space: nowrap; }
+  .shell-steps { display: flex; align-items: center; gap: 28px; min-height: 70px; padding: 0 14px; font-size: 14px; flex-wrap: wrap; }
   .shell-steps > span:not(.step-line) { display: inline-flex; align-items: center; gap: 8px; }
   .step-active { color: var(--color-primary); font-weight: 700; }
   .step-complete { color: var(--color-foreground); font-weight: 600; }
   .step-future { color: var(--color-muted-foreground); }
-  .step-dot { display: inline-grid; width: 18px; height: 18px; border-radius: 50%; place-items: center; color: var(--color-primary-foreground); background: var(--color-muted-foreground); font-size: 10px; font-weight: 700; }
-  .step-active .step-dot { background: var(--color-primary); }
-  .step-complete .step-dot { background: var(--color-foreground); }
-  .step-line { width: 34px; height: 1px; background: var(--color-muted-foreground); flex: none; }
+  .step-dot { display: inline-grid; width: 18px; height: 18px; border-radius: 50%; place-items: center; color: var(--color-muted-foreground); border: 1px solid currentColor; font-size: 13px; font-weight: 700; }
+  .step-active .step-dot { color: var(--color-primary); }
+  .step-complete .step-dot { color: var(--color-foreground); }
   .work-surface { min-height: 680px; background: var(--color-card); border-radius: 20px 20px 0 0; }
   .plan-prose { line-height: 1.6; font-size: 0.875rem; overflow-wrap: anywhere; }
   .plan-prose h1 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; line-height: 1.3; margin: 1.4rem 0 0.6rem; }
@@ -70,7 +68,7 @@
   .app-frame { padding: 0; }
   .app-shell { padding: 10px 10px 0; min-height: 100vh; }
   .work-surface { border-radius: 16px 16px 0 0; }
-  .shell-steps { overflow-x: auto; }
+  .shell-steps { gap: 10px 18px; padding: 10px 8px; font-size: 12px; }
   .plan-prose table { display: block; overflow-x: auto; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

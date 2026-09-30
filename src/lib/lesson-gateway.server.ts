@@ -1,41 +1,54 @@
-import { createOpenAI } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
+const MODEL = 'anthropic/claude-sonnet-4.5';
 
-const GATEWAY = 'https://ai.gateway.lovable.dev/v1';
+type Chunk = { choices?: Array<{ delta?: { content?: string | null; refusal?: string | null }; finish_reason?: string | null }>; error?: { message?: string } };
 
 export function createLessonGateway(apiKey: string) {
-  let runId: string | undefined;
-  let gatewayError: { status: number; message: string } | undefined;
-  const provider = createOpenAI({
-    baseURL: GATEWAY,
-    apiKey,
-    headers: { 'Lovable-API-Key': apiKey, 'X-Lovable-AIG-SDK': 'vercel-ai-sdk' },
-    fetch: async (input, init) => {
-      const headers = new Headers(init?.headers);
-      if (runId) headers.set('X-Lovable-AIG-Run-ID', runId);
-      const response = await fetch(input, { ...init, headers });
-      runId ??= response.headers.get('X-Lovable-AIG-Run-ID') ?? undefined;
-      if (!response.ok) {
-        const body = await response.clone().json().catch(() => null) as { message?: string; error?: { message?: string } } | null;
-        gatewayError = { status: response.status, message: body?.error?.message ?? body?.message ?? `Ошибка генерации (${response.status})` };
-      }
-      return response;
-    },
-  });
-
   return {
-    getError: () => gatewayError,
-    stream: (system: string, user: string) => streamText({
-      model: provider.responses('openai/gpt-6-astra'),
-      instructions: system,
-      messages: [{ role: 'user', content: user }],
-      providerOptions: { openai: {
-        forceReasoning: true,
-        reasoningEffort: 'medium',
-        reasoningSummary: 'auto',
-        store: false,
-        include: ['reasoning.encrypted_content'],
-      } },
-    }),
+    async stream(system: string, user: string): Promise<string> {
+      const response = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: MODEL, stream: true, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => null) as { error?: { message?: string }; message?: string } | null;
+        throw new Error(body?.error?.message ?? body?.message ?? `Ошибка генерации (${response.status})`);
+      }
+      if (!response.body) throw new Error('Пустой ответ генератора');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let text = '';
+      let denied = false;
+      const handleFrame = (frame: string) => {
+        const payload = frame.split('\n').filter(line => line.startsWith('data:')).map(line => line.slice(5).trim()).join('\n');
+        if (!payload || payload === '[DONE]') return;
+        const chunk = JSON.parse(payload) as Chunk;
+        if (chunk.error) throw new Error(chunk.error.message ?? 'Ошибка генерации');
+        for (const choice of chunk.choices ?? []) {
+          if (choice.delta?.refusal || choice.finish_reason === 'content_filter') denied = true;
+          text += choice.delta?.content ?? '';
+        }
+      };
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          buffer = buffer.replace(/\r\n/g, '\n');
+          let boundary: number;
+          while ((boundary = buffer.indexOf('\n\n')) >= 0) {
+            handleFrame(buffer.slice(0, boundary));
+            buffer = buffer.slice(boundary + 2);
+          }
+        }
+        buffer += decoder.decode();
+        if (buffer.trim()) handleFrame(buffer);
+      } finally { reader.releaseLock(); }
+      if (denied) throw new Error('Модель отказалась сформировать план урока');
+      if (!text.trim()) throw new Error('Пустой ответ генератора');
+      return text;
+    },
   };
 }

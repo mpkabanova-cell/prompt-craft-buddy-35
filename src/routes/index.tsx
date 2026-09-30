@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
-import { ArrowLeft, BookOpen, Check, ChevronDown, Clipboard, Download, FileJson, Sparkles } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, Clipboard, Download, FileJson, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -42,7 +42,7 @@ function TopicPicker({value, onChange, ranked}: {value:Lesson|undefined;onChange
       <Command filter={(item, search) => item.toLocaleLowerCase('ru').includes(search.toLocaleLowerCase('ru')) ? 1 : 0}>
         <CommandInput placeholder="Номер или название урока..." aria-label="Поиск урока" />
         <CommandList className="max-h-[340px]"><CommandEmpty>Уроки не найдены</CommandEmpty>
-          {([['Актуально сейчас',ranked.current],['Рядом по плану',ranked.nearby],['Все темы',ranked.all]] as const).map(([heading,items]) => <CommandGroup key={heading} heading={heading}>
+          {([['Актуально сейчас',ranked.current],['Темы уроков',ranked.all]] as const).map(([heading,items]) => items.length > 0 && <CommandGroup key={heading} heading={heading}>
             {items.map(l => <CommandItem key={l.lessonNumber} value={`${l.lessonNumber} ${l.lessonTopic} ${l.unitTopic}`} onSelect={() => {onChange(l);setOpen(false);}} className="flex items-start gap-3 py-3 cursor-pointer">
               <span className="flex h-7 w-8 shrink-0 items-center justify-center rounded bg-secondary text-xs font-semibold text-secondary-foreground">{l.lessonNumber}</span>
               <span className="min-w-0 flex-1"><span className="block text-sm leading-snug">{l.lessonTopic}</span><span className="mt-1 block text-xs text-muted-foreground">{l.unitTopic} · {l.quarter} четверть · {l.week} неделя</span></span>
@@ -79,8 +79,7 @@ function Index() {
   }
   return <div className="app-frame min-h-screen bg-background">
     <div className="app-shell">
-    <header className="shell-header"><div className="flex items-center gap-3"><span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground"><BookOpen size={19}/></span><span className="font-display text-base font-bold text-foreground">Урок по плану</span></div><span className="hidden text-xs font-medium text-muted-foreground sm:block">ТЕМАТИЧЕСКОЕ ПЛАНИРОВАНИЕ</span></header>
-    <div className="shell-steps" aria-label="Этапы работы"><span className={plan ? 'step-complete' : 'step-active'}><span className="step-dot">{plan ? '✓' : '1'}</span>Выбор урока</span><span className="step-line"/><span className={plan ? 'step-active' : 'step-future'}><span className="step-dot">2</span>План урока</span></div>
+    <header className="shell-steps" aria-label="Этапы работы"><span className="step-complete"><span className="step-dot">✓</span>Выбор урока</span><span className={plan || loading ? 'step-active' : 'step-future'}><span className="step-dot">◔</span>План урока</span><span className="step-future"><span className="step-dot">◔</span>Материалы для урока</span></header>
     {!plan && !loading && <main className="work-surface px-5 pb-16 pt-9 md:px-9 md:pt-11">
       <div className="max-w-3xl"><h1 className="font-display text-3xl font-bold leading-tight md:text-4xl">Создать план урока</h1><p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">Выберите урок из тематического планирования — структура и содержание плана будут подготовлены автоматически.</p></div>
       <section className="mt-9 border-y border-border py-7" aria-label="Выбор урока">
