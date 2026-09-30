@@ -7,3 +7,4 @@
 - Keep the full approved methodology prompt and AI request in server-only modules; this protects the prompt/key and lets server-side validation reject malformed plans.
 - Use TanStack Start server functions for one-shot lesson generation; this is the app's internal request boundary.
 - Rank lessons from the configurable academic calendar without filtering any lesson out; teachers retain access to the complete syllabus.
+- Count actual Monday–Friday teaching dates outside inclusive vacation ranges, with the first-grade break scoped to grade 1; this keeps partial holiday weeks and subject lesson load accurate.
