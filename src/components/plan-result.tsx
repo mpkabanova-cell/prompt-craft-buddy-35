@@ -7,7 +7,7 @@ import type { Plan } from '@/lib/lesson-plan';
 
 function RichText({ children, className = '', definitions = false }: { children: string; className?: string; definitions?: boolean }) {
   const normalized = children
-    .replace(/\\\(([\s\S]*?)\\\)/g, (_match, math: string) => `$${math}$`)
+    .replace(/\\\(([\s\S]*?)\\\)/g, (_match, math: string) => `$${math.replace(/\\frac(?=\s*\{)/g, '\\dfrac')}$`)
     .replace(/\\\[([\s\S]*?)\\\]/g, (_match, math: string) => `$$\n${math}\n$$`);
   return <div className={`result-rich ${className}`}><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} skipHtml components={{
     table: ({ children: contents }) => <div className="result-table-scroll"><table>{contents}</table></div>,
