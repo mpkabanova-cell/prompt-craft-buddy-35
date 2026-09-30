@@ -24,12 +24,13 @@ export async function generatePlan(lessonNumber: number): Promise<Plan> {
     const raw = payload.choices?.[0]?.message?.content;
     if (!raw) throw new Error('Пустой ответ генератора');
     let plan: Plan;
+    let cleaned = '';
     try {
-      const cleaned = raw.replace(/^```(?:json)?\s*|\s*```$/g,'').replace(/(?<!\\)\\(?!\\)(?=(?:frac|dfrac|tfrac|cdot|times|div|left|right|text|operatorname|neq|leq|geq|sqrt|overline|begin|end|\(|\)|\[|\]))/g, '\\\\').replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+      cleaned = raw.replace(/^```(?:json)?\s*|\s*```$/g,'').replace(/(?<!\\)\\(?!\\)(?=(?:frac|dfrac|tfrac|cdot|times|div|left|right|text|operatorname|neq|leq|geq|sqrt|overline|begin|end|\(|\)|\[|\]))/g, '\\\\').replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
       const parsed = JSON.parse(cleaned) as Plan & {plans?: Plan[]};
       plan = parsed.plans?.[0] ?? parsed;
     }
-    catch (error) { const pos = Number(String(error).match(/position (\d+)/)?.[1]); console.warn('Invalid response', attempt, raw.length, String(error), Number.isFinite(pos) ? raw.slice(Math.max(0,pos-50),pos+50) : ''); correction = 'Ответ не был корректным JSON или оборвался. Все обратные слэши в LaTeX должны быть удвоены для корректного JSON. Верни один законченный объект.'; continue; }
+    catch (error) { const pos = Number(String(error).match(/position (\d+)/)?.[1]); console.warn('Invalid response', attempt, raw.length, String(error), Number.isFinite(pos) ? cleaned.slice(Math.max(0,pos-50),pos+50) : ''); correction = 'Ответ не был корректным JSON или оборвался. Все обратные слэши в LaTeX должны быть удвоены для корректного JSON. Верни один законченный объект.'; continue; }
     const errors = validateLessonPlan(plan,lesson);
     if (errors.length === 0) return plan;
     console.warn('Validation', attempt, errors);
