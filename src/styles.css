@@ -91,6 +91,7 @@
   .result-row { display: grid; grid-template-columns: minmax(130px, 25%) minmax(0, 1fr); gap: 1.1rem; padding: 0.7rem 0; }
   .result-row h3 { font-size: 0.95rem; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
   .result-row h3 .result-rich p { margin: 0; }
+  .result-subgroup { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem; }
   .result-row > .result-list, .concept-grid .result-list { margin: 0; padding-left: 1.3rem; }
   .result-list { list-style: disc; }
   .result-list > li { padding-left: 0.1rem; margin-bottom: 0.3rem; }
@@ -109,7 +110,7 @@
   .result-activities h4, .result-outcome h4 { font-size: 0.78rem; font-weight: 750; text-transform: uppercase; color: var(--color-muted-foreground); margin: 0 0 0.45rem; }
   .result-outcome { margin-top: 1rem; }
   .result-outcome .result-rich { color: var(--color-muted-foreground); }
-  .result-content > p:has(> strong:first-child) { background: var(--color-secondary); padding: 0.85rem 1rem; border-radius: var(--radius); margin: 0.85rem 0; }
+  .result-content > p.result-definition { background: var(--color-secondary); padding: 0.85rem 1rem; border-radius: var(--radius); margin: 0.85rem 0; }
   .result-content > h3, .result-content > h4 { color: var(--color-foreground); }
 }
 @media (max-width: 720px) {
