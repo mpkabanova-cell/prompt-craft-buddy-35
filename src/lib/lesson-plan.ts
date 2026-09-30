@@ -18,16 +18,16 @@ export function validateLessonPlan(p: Plan, lesson: Lesson): string[] {
   if (!p || !p.lesson) return ['Нет структуры плана'];
   if (p.lesson.number !== lesson.lessonNumber || p.lesson.title !== lesson.lessonTopic) errors.push('Номер или тема не совпадает со справочником');
   if (p.lesson.lessonType !== lesson.lessonType) errors.push('Тип урока не совпадает со справочником');
-  if (p.lesson.durationMinutes !== lesson.hours*45) errors.push('Неверная длительность урока');
+   if (p.lesson.durationMinutes !== 45) errors.push('Длительность урока должна быть 45 минут');
   const schema = stagesByType[lesson.lessonType];
   if (!schema || !Array.isArray(p.lessonStages) || p.lessonStages.length !== schema.names.length) errors.push('Неверное число этапов');
   else {
     p.lessonStages.forEach((stage,i) => {
       if (!stage.content?.includes(`### ${i+1}. ${schema.names[i]}`)) errors.push(`Неверное название этапа ${i+1}`);
-      if (stage.durationMinutes !== schema.minutes[i]) errors.push(`Неверная длительность этапа ${i+1}`);
+       if (!Number.isInteger(stage.durationMinutes) || stage.durationMinutes <= 0 || stage.durationMinutes !== schema.minutes[i]) errors.push(`Неверная длительность этапа ${i+1}`);
       if (!stage.content?.includes('**Деятельность учителя**') || !stage.content?.includes('**Деятельность учащихся**') || !stage.content?.includes('**Результат этапа:**')) errors.push(`Неполный этап ${i+1}`);
     });
-    if (p.lessonStages.reduce((sum,stage) => sum+stage.durationMinutes,0) !== lesson.hours*45) errors.push('Сумма времени не совпадает');
+     if (p.lessonStages.reduce((sum,stage) => sum+stage.durationMinutes,0) !== 45) errors.push('Сумма времени этапов должна быть ровно 45 минут');
   }
   if (!p.goal?.content?.includes(lesson.goal)) errors.push('Цель не совпадает со справочником');
   if (p.lesson.subject !== 'Математика' || p.lesson.grade !== '6 класс' || Number(p.lesson.quarter) !== lesson.quarter || Number(p.lesson.week) !== lesson.week) errors.push('Метаданные урока не совпадают со справочником');
