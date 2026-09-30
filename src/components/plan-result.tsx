@@ -75,8 +75,9 @@ export function PlanResult({ plan }: { plan: Plan }) {
     <ResultSection id="section-2" title="Задачи урока"><RichText>{withoutTitle(plan.objectives.content, 'Задачи урока')}</RichText></ResultSection>
     <ResultSection id="section-3" title="Планируемые результаты">
       {resultRows.length ? <div className="result-rows">{resultRows.map((row, i) => {
-        const metacognitive = row[0].replace(/\*\*/g, '').match(/^Метапредметные\s*[—–-]\s*(.+)$/i);
-        return <div className="result-row" key={i}><h3>{metacognitive ? (resultRows.slice(0, i).some(previous => /^Метапредметные/i.test(previous[0].replace(/\*\*/g, ''))) ? null : 'Метапредметные') : row[0].replace(/\*\*/g, '')}</h3><div>{metacognitive && <h4 className="result-subgroup">{metacognitive[1]}</h4>}<ResultList text={row.slice(1).join(' | ')} /></div></div>;
+        const label = (row[0] ?? '').replace(/\*\*/g, '');
+        const metacognitive = label.match(/^Метапредметные\s*[—–-]\s*(.+)$/i);
+        return <div className="result-row" key={i}><h3>{metacognitive ? (resultRows.slice(0, i).some(previous => /^Метапредметные/i.test(previous[0] ?? '')) ? null : 'Метапредметные') : label}</h3><div>{metacognitive && <h4 className="result-subgroup">{metacognitive[1]}</h4>}<ResultList text={row.slice(1).join(' | ')} /></div></div>;
       })}</div> : <RichText>{plan.plannedResults.table}</RichText>}
     </ResultSection>
     <ResultSection id="section-4" title="Понятия урока"><div className="concept-grid"><div><h3>Основные понятия</h3><ResultList text={concepts || '—'} /></div><div><h3>Новые понятия</h3><ResultList text={newConcepts} /></div></div></ResultSection>
