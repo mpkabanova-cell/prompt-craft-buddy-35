@@ -27,7 +27,7 @@ export function validateLessonPlan(p: Plan, lesson: Lesson): string[] {
       if (!stage.content?.includes(`### ${i+1}. ${schema.names[i]}`)) errors.push(`Неверное название этапа ${i+1}`);
        if (!Number.isInteger(stage.durationMinutes) || stage.durationMinutes <= 0 || stage.durationMinutes !== schema.minutes[i]) errors.push(`Неверная длительность этапа ${i+1}`);
       if (!stage.content?.includes('**Деятельность учителя**') || !stage.content?.includes('**Деятельность учащихся**') || !stage.content?.includes('**Результат этапа:**')) errors.push(`Неполный этап ${i+1}`);
-      if (stage.content && !/^### \d+\.[^\n]+\n\s*\*\*Деятельность учителя\*\*/m.test(stage.content)) errors.push(`Нарушено оформление этапа ${i+1}`);
+      if (stage.content && (!/^### \d+\.[^\n]+\n\s*\*\*Деятельность учителя\*\*/m.test(stage.content) || !/^\*\*Деятельность учащихся\*\*/m.test(stage.content) || !/^\*\*Результат этапа:\*\*/m.test(stage.content) || /[^\n]\s+-\s+(?:Просит|Предлагает|Помогает|Организует|Задаёт|Выделяют|Формулируют|Вычисляют|Раскладывают)\b/.test(stage.content))) errors.push(`Нарушено оформление этапа ${i+1}`);
     });
      if (p.lessonStages.reduce((sum,stage) => sum+stage.durationMinutes,0) !== 45) errors.push('Сумма времени этапов должна быть ровно 45 минут');
   }
