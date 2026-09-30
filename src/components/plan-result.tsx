@@ -3,10 +3,10 @@ import { isValidElement, type ReactNode } from 'react';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import type { Plan } from '@/lib/lesson-plan';
+import { normalizeMarkdown, type Plan } from '@/lib/lesson-plan';
 
 function RichText({ children, className = '', definitions = false }: { children: string; className?: string; definitions?: boolean }) {
-  const normalized = children
+  const normalized = normalizeMarkdown(children)
     .replace(/\\\(([\s\S]*?)\\\)/g, (_match, math: string) => `$${math.replace(/\\frac(?=\s*\{)/g, '\\dfrac')}$`)
     .replace(/\\\[([\s\S]*?)\\\]/g, (_match, math: string) => `$$\n${math}\n$$`);
   return <div className={`result-rich ${className}`}><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} skipHtml components={{

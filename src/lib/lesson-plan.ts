@@ -53,8 +53,15 @@ export function validateLessonPlan(p: Plan, lesson: Lesson): string[] {
   })) errors.push('Некорректная математическая формула');
   return errors;
 }
+/** Keeps Markdown structure intact: display formulas become one-line blocks; ones inside a list/text line become inline. */
+export function normalizeMarkdown(text: string) {
+  return text.replace(/\r\n/g, '\n')
+    .replace(/(^|\n)([^\n]*?\S[^\n]*?)\\\[\s*([\s\S]*?)\s*\\\]/g, (_m, start: string, before: string, math: string) => `${start}${before}\\(${math.replace(/\s*\n\s*/g, ' ')}\\)`)
+    .replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, (_m, math: string) => `\n\n\\[${math.replace(/\s*\n\s*/g, ' ')}\\]\n\n`)
+    .replace(/\n{3,}/g, '\n\n').trim();
+}
 export function planToMarkdown(p: Plan) {
   const referenceLesson = lessons.find(lesson => lesson.lessonNumber === p.lesson.number);
   const title = referenceLesson ? lessonDisplayTitle(referenceLesson) : p.lesson.title;
-  return [`# Урок ${p.lesson.number}. ${title}`,`**${p.lesson.subject} · ${p.lesson.grade} · ${p.lesson.lessonType} · ${p.lesson.durationMinutes} мин · ${p.lesson.quarter} четверть · ${p.lesson.week} неделя**`,p.goal.content,p.objectives.content,p.plannedResults.title,p.plannedResults.table,p.keyConcepts.title,p.keyConcepts.table,p.prerequisites.title,p.prerequisites.content,'## Ход урока',...p.lessonStages.map(s => `${s.content}\n\n*${s.durationMinutes} мин*`),p.lessonContent.title,p.lessonContent.content,p.homework.content].join('\n\n');
+  return [`# Урок ${p.lesson.number}. ${title}`,`**${p.lesson.subject} · ${p.lesson.grade} · ${p.lesson.lessonType} · ${p.lesson.durationMinutes} мин · ${p.lesson.quarter} четверть · ${p.lesson.week} неделя**`,p.goal.content,p.objectives.content,p.plannedResults.title,p.plannedResults.table,p.keyConcepts.title,p.keyConcepts.table,p.prerequisites.title,p.prerequisites.content,'## Ход урока',...p.lessonStages.map(s => `${s.content}\n\n*${s.durationMinutes} мин*`),p.lessonContent.title,p.lessonContent.content,p.homework.content].map(normalizeMarkdown).join('\n\n');
 }
