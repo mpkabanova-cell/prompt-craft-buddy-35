@@ -57,7 +57,7 @@ export function validateLessonPlan(p: Plan, lesson: Lesson): string[] {
 export function normalizeMarkdown(text: string) {
   return text.replace(/\r\n/g, '\n')
     .replace(/(^|\n)([^\n]*?\S[^\n]*?)\\\[\s*([\s\S]*?)\s*\\\]/g, (_m, start: string, before: string, math: string) => `${start}${before}\\(${math.replace(/\s*\n\s*/g, ' ')}\\)`)
-    .replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, (_m, math: string) => `\n\\[${math.replace(/\s*\n\s*/g, ' ')}\\]\n`)
+    .replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, (_m, math: string) => `\n\n\\[${math.replace(/\s*\n\s*/g, ' ')}\\]\n\n`)
     .replace(/\n{3,}/g, '\n\n').trim();
 }
 export function planToMarkdown(p: Plan) {
