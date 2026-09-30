@@ -81,6 +81,7 @@
   .result-rich h3 { font-size: 1.1rem; font-weight: 700; margin: 1.35rem 0 0.55rem; }
   .result-rich h4 { font-size: 1rem; font-weight: 700; margin: 1rem 0 0.45rem; }
   .result-rich blockquote { border-left: 2px solid var(--color-primary); padding: 0.4rem 0 0.4rem 1rem; margin: 1rem 0; }
+  .result-table-scroll { max-width: 100%; overflow-x: auto; margin: 1rem 0; }
   .result-rich table { width: 100%; table-layout: fixed; border-collapse: collapse; }
   .result-rich th, .result-rich td { padding: 0.65rem; text-align: left; vertical-align: top; overflow-wrap: anywhere; border-bottom: 1px solid var(--color-border); }
   .result-rich th { background: var(--color-secondary); }
@@ -93,7 +94,7 @@
   .result-row h3 { font-size: 0.95rem; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
   .result-row h3 .result-rich p { margin: 0; }
   .result-subgroup { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem; }
-  .result-row > .result-list, .concept-grid .result-list { margin: 0; padding-left: 1.3rem; }
+  .result-row .result-list, .concept-grid .result-list { margin: 0; padding-left: 1.3rem; }
   .result-list { list-style: disc; }
   .result-list > li { padding-left: 0.1rem; margin-bottom: 0.3rem; }
   .concept-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; }
@@ -123,6 +124,7 @@
   .step-dot { width: 22px; height: 22px; font-size: 12px; }
   .plan-prose table { display: block; overflow-x: auto; }
   .result-row { grid-template-columns: minmax(100px, 32%) minmax(0, 1fr); gap: 0.7rem; }
+  .result-content .result-table-scroll table { min-width: 540px; }
   .result-activities { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
   .plan-result { font-size: 0.875rem; }
   .result-section > h2 { font-size: 1.25rem; }
