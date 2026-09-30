@@ -55,7 +55,7 @@ export function validateLessonPlan(p: Plan, lesson: Lesson): string[] {
 }
 /** Keeps Markdown structure intact: display formulas become one-line blocks; ones inside a list/text line become inline. */
 export function normalizeMarkdown(text: string) {
-  return text.replace(/\r\n/g, '\n').split('\n').reduce<string[]>((acc, line) => { acc.push(line); return acc; }, []).join('\n')
+  return text.replace(/\r\n/g, '\n')
     .replace(/(^|\n)([^\n]*?\S[^\n]*?)\\\[\s*([\s\S]*?)\s*\\\]/g, (_m, start: string, before: string, math: string) => `${start}${before}\\(${math.replace(/\s*\n\s*/g, ' ')}\\)`)
     .replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, (_m, math: string) => `\n\\[${math.replace(/\s*\n\s*/g, ' ')}\\]\n`)
     .replace(/\n{3,}/g, '\n\n').trim();
