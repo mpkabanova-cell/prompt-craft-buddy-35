@@ -1,10 +1,9 @@
 <!-- LOVABLE:BEGIN -->
 > [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
+> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting published git history.
 <!-- LOVABLE:END -->
+
+- Keep the sixth-grade mathematics reference as generated JSON from the uploaded spreadsheet; this prevents rereading Excel for each request.
+- Keep the full approved methodology prompt and AI request in server-only modules; this protects the prompt/key and lets server-side validation reject malformed plans.
+- Use TanStack Start server functions for one-shot lesson generation; this is the app's internal request boundary.
+- Rank lessons from the configurable academic calendar without filtering any lesson out; teachers retain access to the complete syllabus.
