@@ -9,3 +9,4 @@
 - Rank lessons from the configurable academic calendar without filtering any lesson out; teachers retain access to the complete syllabus.
 - Count actual Monday–Friday teaching dates outside inclusive vacation ranges, with the first-grade break scoped to grade 1; this keeps partial holiday weeks and subject lesson load accurate.
 - Use the server-held PENROUTER_API_KEY with OpenRouter Claude Sonnet 4.5 for streamed one-shot lesson generation and reject any plan whose stage durations do not total exactly 45 minutes; this protects the key and prevents invalid plans from reaching teachers.
+- Derive control-work display titles from the reference section without changing lessonTopic; this preserves exact source matching while making titles meaningful in the UI and downloads.
