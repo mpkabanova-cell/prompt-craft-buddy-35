@@ -8,7 +8,7 @@ export async function generatePlan(lessonNumber: number): Promise<Plan> {
   if (!lesson) throw new Error('Урок не найден');
   const index = lessons.indexOf(lesson);
   const context = {currentDate: new Date().toISOString().slice(0,10), subject:'Математика', grade:'6 класс', lesson, previousLesson:lessons[index-1] ?? null, previousLesson2:lessons[index-2] ?? null, nextLesson:lessons[index+1] ?? null, nextLesson2:lessons[index+2] ?? null};
-  const apiKey = process.env['LOVABLE_API_KEY'];
+  const apiKey = process.env['PENROUTER_API_KEY'];
   if (!apiKey) throw new Error('Сервис генерации временно недоступен');
   const stageSpec = stagesByType[lesson.lessonType];
   if (!stageSpec || stageSpec.minutes.reduce((sum, minutes) => sum + minutes, 0) !== 45) throw new Error('Ошибка настройки времени урока');
@@ -16,14 +16,7 @@ export async function generatePlan(lessonNumber: number): Promise<Plan> {
   let correction = '';
   for (let attempt=0; attempt<2; attempt++) {
     const system = LESSON_PLAN_SYSTEM_PROMPT + '\n\nДля одного выбранного урока верни только один JSON-объект плана из массива plans раздела 31, без оболочки format/source/plans и без markdown-ограждений. Все обязательные содержательные строки заполни. Названия этапов и минуты точно соответствуют указанному ниже списку. Цель воспроизведи дословно. Не используй HTML. Не придумывай новые понятия. Если тип урока не входит в четыре перечисленных в промпте, следуй дополнительной схеме из входных данных. Каждый урок длится ровно 45 минут: перед ответом сложи durationMinutes всех этапов, сумма обязана быть 45; сумма также должна совпадать с lesson.durationMinutes. Верни полноценные конкретные задания, решения и ответы в содержании. Излагай компактно, чтобы закончить JSON без обрыва.';
-    let raw: string;
-    try {
-      raw = await gateway.stream(system, JSON.stringify({...context, requiredStages:stageSpec, correction})).text;
-    } catch (error) {
-      const upstream = gateway.getError();
-      if (upstream) throw new Error(upstream.message);
-      throw error;
-    }
+    const raw = await gateway.stream(system, JSON.stringify({...context, requiredStages:stageSpec, correction}));
     if (!raw) throw new Error('Пустой ответ генератора');
     let plan: Plan;
     let cleaned = '';
