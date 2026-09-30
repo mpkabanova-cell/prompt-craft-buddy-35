@@ -69,17 +69,25 @@ function StageView({ stage }: { stage: Plan['lessonStages'][number] }) {
 export function PlanResult({ plan }: { plan: Plan }) {
   const conceptRows = rowsFromTable(plan.keyConcepts.table);
   const resultRows = rowsFromTable(plan.plannedResults.table).slice(1);
+  const resultGroups: { label: string; entries: { subheading?: string; text: string }[] }[] = [];
+  for (const row of resultRows) {
+    const heading = (row[0] ?? '').replace(/\*\*/g, '');
+    const meta = heading.match(/^Метапредметные(?:\s*[—–-]\s*|\s+)(.+)$/i);
+    const label = meta ? 'Метапредметные' : heading;
+    const last = resultGroups[resultGroups.length - 1];
+    const group = last?.label === label ? last : { label, entries: [] };
+    if (group !== last) resultGroups.push(group);
+    group.entries.push({ subheading: meta?.[1], text: row.slice(1).join(' | ') });
+  }
   const concepts = conceptRows.slice(1).map(row => row[0]).filter(Boolean).join('; ');
   const newConcepts = conceptRows.slice(1).map(row => row[1]).filter(Boolean).join('; ') || '—';
   return <article className="plan-result min-w-0 pt-2">
     <ResultSection id="section-1" title="Цель урока"><RichText>{withoutTitle(plan.goal.content, 'Цель урока')}</RichText></ResultSection>
     <ResultSection id="section-2" title="Задачи урока"><RichText>{withoutTitle(plan.objectives.content, 'Задачи урока')}</RichText></ResultSection>
     <ResultSection id="section-3" title="Планируемые результаты">
-      {resultRows.length ? <div className="result-rows">{resultRows.map((row, i) => {
-        const label = (row[0] ?? '').replace(/\*\*/g, '');
-        const metacognitive = label.match(/^Метапредметные(?:\s*[—–-]\s*|\s+)(.+)$/i);
-        return <div className="result-row" key={i}><h3>{metacognitive ? (resultRows.slice(0, i).some(previous => /^Метапредметные/i.test(previous[0] ?? '')) ? null : 'Метапредметные') : label}</h3><div>{metacognitive && <h4 className="result-subgroup">{metacognitive[1]}</h4>}<ResultList text={row.slice(1).join(' | ')} /></div></div>;
-      })}</div> : <RichText>{plan.plannedResults.table}</RichText>}
+      {resultGroups.length ? <div className="result-rows">{resultGroups.map((group, i) =>
+        <div className="result-row" key={i}><h3>{group.label}</h3><div>{group.entries.map((entry, j) => <div className="result-entry" key={j}>{entry.subheading && <h4 className="result-subgroup">{entry.subheading}</h4>}<ResultList text={entry.text} /></div>)}</div></div>
+      )}</div> : <RichText>{plan.plannedResults.table}</RichText>}
     </ResultSection>
     <ResultSection id="section-4" title="Понятия урока"><div className="concept-grid"><div><h3>Основные понятия</h3><ResultList text={concepts || '—'} /></div><div><h3>Новые понятия</h3><ResultList text={newConcepts} /></div></div></ResultSection>
     <ResultSection id="section-5" title="Опорные знания и умения"><RichText>{withoutTitle(plan.prerequisites.content, 'Опорные знания и умения')}</RichText></ResultSection>
