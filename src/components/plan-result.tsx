@@ -7,14 +7,14 @@ import type { Plan } from '@/lib/lesson-plan';
 
 function RichText({ children, className = '', definitions = false }: { children: string; className?: string; definitions?: boolean }) {
   const normalized = children
-    .replace(/\\\(([\s\S]*?)\\\)/g, (_match, math: string) => `$${math}$`)
+    .replace(/\\\(([\s\S]*?)\\\)/g, (_match, math: string) => `$${math.replace(/\\frac(?=\s*\{)/g, '\\dfrac')}$`)
     .replace(/\\\[([\s\S]*?)\\\]/g, (_match, math: string) => `$$\n${math}\n$$`);
   return <div className={`result-rich ${className}`}><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} skipHtml components={{
     table: ({ children: contents }) => <div className="result-table-scroll"><table>{contents}</table></div>,
     p: ({ children: contents }) => {
       const first = Array.isArray(contents) ? contents[0] : contents;
       const label = isValidElement<{ children?: ReactNode }>(first) && first.type === 'strong' ? first.props.children : null;
-      const isDefinition = definitions && typeof label === 'string' && /[:.!?]$/.test(label.trim());
+      const isDefinition = definitions && typeof label === 'string' && /^(?:Определение|Правило|Важно|Запомните)\s*:?$/i.test(label.trim());
       return <p className={isDefinition ? 'result-definition' : undefined}>{contents}</p>;
     },
   }}>{normalized}</ReactMarkdown></div>;
@@ -77,7 +77,8 @@ export function PlanResult({ plan }: { plan: Plan }) {
     const last = resultGroups[resultGroups.length - 1];
     const group = last?.label === label ? last : { label, entries: [] };
     if (group !== last) resultGroups.push(group);
-    group.entries.push({ ...(meta?.[1] ? { subheading: meta[1] } : {}), text: row.slice(1).join(' | ') });
+    const subheading = meta?.[1];
+    group.entries.push({ ...(subheading ? { subheading: subheading.charAt(0).toLocaleUpperCase('ru') + subheading.slice(1) } : {}), text: row.slice(1).join(' | ') });
   }
   const concepts = conceptRows.slice(1).map(row => row[0]).filter(Boolean).join('; ');
   const newConcepts = conceptRows.slice(1).map(row => row[1]).filter(Boolean).join('; ') || '—';
