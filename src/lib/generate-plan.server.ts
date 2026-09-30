@@ -26,7 +26,7 @@ export async function generatePlan(lessonNumber: number): Promise<Plan> {
     let plan: Plan;
     let cleaned = '';
     try {
-      cleaned = raw.replace(/^```(?:json)?\s*|\s*```$/g,'').replace(/(?<!\\)\\(?!\\)(?=(?:frac|dfrac|tfrac|cdot|times|div|left|right|text|operatorname|neq|leq|geq|sqrt|overline|begin|end|\(|\)|\[|\]))/g, '\\\\').replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+      cleaned = raw.replace(/^```(?:json)?\s*|\s*```$/g,'').replace(/\\+(?=(?:frac|dfrac|tfrac|cdot|times|div|left|right|text|operatorname|neq|leq|geq|sqrt|overline|begin|end|\(|\)|\[|\]))/g, '\\\\').replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
       const parsed = JSON.parse(cleaned) as Plan & {plans?: Plan[]};
       plan = parsed.plans?.[0] ?? parsed;
     }
