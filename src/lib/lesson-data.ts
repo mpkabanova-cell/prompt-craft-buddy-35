@@ -39,11 +39,10 @@ export function academicPosition(date: Date, grade = '6 класс') {
 }
 export function rankLessonsByCurrentDate(date: Date, grade = '6 класс') {
   const {week, expectedLesson, isVacation, isSchoolDay} = academicPosition(date, grade);
-  const sort = (a: Lesson,b: Lesson) => Math.abs(a.week-week)-Math.abs(b.week-week) || Math.abs(a.lessonNumber-expectedLesson)-Math.abs(b.lessonNumber-expectedLesson) || a.lessonNumber-b.lessonNumber;
+  const current = isVacation ? [] : lessons.filter(l => l.week === week).sort((a,b) => a.lessonNumber-b.lessonNumber);
   return {
-    current: isVacation ? [] : lessons.filter(l => l.week === week).sort(sort),
-    nearby: lessons.filter(l => (isVacation || l.week !== week) && Math.abs(l.week-week) <= 1).sort(sort),
-    all: lessons.filter(l => Math.abs(l.week-week) > 1).sort((a,b) => a.lessonNumber-b.lessonNumber),
+    current,
+    all: lessons.filter(l => !current.some(item => item.lessonNumber === l.lessonNumber)).sort((a,b) => a.lessonNumber-b.lessonNumber),
     week, expectedLesson, isVacation, isSchoolDay,
   };
 }
