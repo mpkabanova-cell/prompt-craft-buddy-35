@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { lessons, subjects, grades, referenceAvailability, rankLessonsByCurrentDate, type Lesson } from '@/lib/lesson-data';
 import { planToMarkdown, type Plan } from '@/lib/lesson-plan';
 import { generateLessonPlan } from '@/lib/generate-plan.functions';
+import logoMark from '@/assets/logo-book-steps.png';
 
 export const Route = createFileRoute('/')({
   head: () => ({meta: [
