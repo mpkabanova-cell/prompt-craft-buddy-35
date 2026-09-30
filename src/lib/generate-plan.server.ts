@@ -26,6 +26,7 @@ export async function generatePlan(lessonNumber: number): Promise<Plan> {
       plan = parsed.plans?.[0] ?? parsed;
     }
     catch (error) { const pos = Number(String(error).match(/position (\d+)/)?.[1]); console.warn('Invalid response', attempt, raw.length, String(error), Number.isFinite(pos) ? cleaned.slice(Math.max(0,pos-50),pos+50) : ''); correction = 'Ответ не был корректным JSON или оборвался. Все обратные слэши в LaTeX должны быть удвоены для корректного JSON. Верни один законченный объект.'; continue; }
+    if (plan && typeof plan === 'object') plan.lesson = {...(plan.lesson ?? {}), subject:'Математика', grade:'6 класс', quarter:lesson.quarter, week:lesson.week} as Plan['lesson'];
     const errors = validateLessonPlan(plan,lesson);
     if (errors.length === 0) return plan;
     console.warn('Validation', attempt, errors);
