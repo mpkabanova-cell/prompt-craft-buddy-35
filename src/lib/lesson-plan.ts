@@ -1,4 +1,4 @@
-import type { Lesson } from './lesson-data';
+import { lessonDisplayTitle, lessons, type Lesson } from './lesson-data';
 import katex from 'katex';
 
 export type Stage = { id: string; durationMinutes: number; content: string };
@@ -54,5 +54,7 @@ export function validateLessonPlan(p: Plan, lesson: Lesson): string[] {
   return errors;
 }
 export function planToMarkdown(p: Plan) {
-  return [`# Урок ${p.lesson.number}. ${p.lesson.title}`,`**${p.lesson.subject} · ${p.lesson.grade} · ${p.lesson.lessonType} · ${p.lesson.durationMinutes} мин · ${p.lesson.quarter} четверть · ${p.lesson.week} неделя**`,p.goal.content,p.objectives.content,p.plannedResults.title,p.plannedResults.table,p.keyConcepts.title,p.keyConcepts.table,p.prerequisites.title,p.prerequisites.content,'## Ход урока',...p.lessonStages.map(s => `${s.content}\n\n*${s.durationMinutes} мин*`),p.lessonContent.title,p.lessonContent.content,p.homework.content].join('\n\n');
+  const referenceLesson = lessons.find(lesson => lesson.lessonNumber === p.lesson.number);
+  const title = referenceLesson ? lessonDisplayTitle(referenceLesson) : p.lesson.title;
+  return [`# Урок ${p.lesson.number}. ${title}`,`**${p.lesson.subject} · ${p.lesson.grade} · ${p.lesson.lessonType} · ${p.lesson.durationMinutes} мин · ${p.lesson.quarter} четверть · ${p.lesson.week} неделя**`,p.goal.content,p.objectives.content,p.plannedResults.title,p.plannedResults.table,p.keyConcepts.title,p.keyConcepts.table,p.prerequisites.title,p.prerequisites.content,'## Ход урока',...p.lessonStages.map(s => `${s.content}\n\n*${s.durationMinutes} мин*`),p.lessonContent.title,p.lessonContent.content,p.homework.content].join('\n\n');
 }
