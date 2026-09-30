@@ -13,7 +13,7 @@ function RichText({ children, className = '', definitions = false }: { children:
     p: ({ children: contents }) => {
       const first = Array.isArray(contents) ? contents[0] : contents;
       const label = isValidElement<{ children?: ReactNode }>(first) && first.type === 'strong' ? first.props.children : null;
-      const isDefinition = typeof label === 'string' && /[.!?]$/.test(label.trim()) && !/:$/.test(label.trim());
+      const isDefinition = typeof label === 'string' && /[:.!?]$/.test(label.trim());
       return <p className={isDefinition ? 'result-definition' : undefined}>{contents}</p>;
     },
   } : undefined}>{normalized}</ReactMarkdown></div>;
