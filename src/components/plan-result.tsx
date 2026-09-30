@@ -77,7 +77,7 @@ export function PlanResult({ plan }: { plan: Plan }) {
     const last = resultGroups[resultGroups.length - 1];
     const group = last?.label === label ? last : { label, entries: [] };
     if (group !== last) resultGroups.push(group);
-    group.entries.push({ subheading: meta?.[1], text: row.slice(1).join(' | ') });
+    group.entries.push({ ...(meta?.[1] ? { subheading: meta[1] } : {}), text: row.slice(1).join(' | ') });
   }
   const concepts = conceptRows.slice(1).map(row => row[0]).filter(Boolean).join('; ');
   const newConcepts = conceptRows.slice(1).map(row => row[1]).filter(Boolean).join('; ') || '—';
