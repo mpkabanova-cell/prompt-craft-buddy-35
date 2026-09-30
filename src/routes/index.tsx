@@ -1,10 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { ArrowLeft, Check, CheckCircle2, ChevronDown, Circle, Clipboard, Download, FileJson, LoaderCircle, Sparkles } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
+import { PlanResult } from '@/components/plan-result';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -28,11 +25,6 @@ export const Route = createFileRoute('/')({
 });
 
 const sections = ['Цель урока','Задачи урока','Планируемые результаты','Понятия урока','Опорные знания и умения','Ход урока','Содержание урока','Домашнее задание'];
-const idFor = (label: string) => sections.indexOf(label) >= 0 ? `section-${sections.indexOf(label)+1}` : undefined;
-function Markdown({content}: {content:string}) {
-  const normalized = content.replace(/\\\((.*?)\\\)/gs, (_match, math: string) => `$${math}$`).replace(/\\\[([\s\S]*?)\\\]/g, (_match, math: string) => `$$\n${math}\n$$`);
-  return <ReactMarkdown remarkPlugins={[remarkGfm,remarkMath]} rehypePlugins={[rehypeKatex]} skipHtml components={{h2:({children}) => <h2 id={idFor(String(children))}>{children}</h2>}}>{normalized}</ReactMarkdown>;
-}
 function TopicPicker({value, onChange, ranked}: {value:Lesson|undefined;onChange:(lesson:Lesson)=>void;ranked:ReturnType<typeof rankLessonsByCurrentDate>}) {
   const [open,setOpen] = useState(false);
   return <Popover open={open} onOpenChange={setOpen}>
@@ -108,7 +100,7 @@ function Index() {
       {plan && <main className="work-surface px-5 pb-20 pt-7 md:px-9"><Button variant="ghost" className="-ml-3 text-muted-foreground" onClick={()=>{setPlan(undefined);setCopied(false);}}><ArrowLeft/>Изменить урок</Button>
         <div className="mt-5 border-b pb-6"><h1 className="max-w-4xl font-display text-3xl font-bold leading-tight md:text-4xl">{selected ? lessonDisplayTitle(selected) : plan.lesson.title}</h1><p className="mt-2 text-sm text-muted-foreground">Математика · 6 класс · {plan.lesson.lessonType} · {plan.lesson.section} · Урок {plan.lesson.number} · {plan.lesson.durationMinutes} мин</p>
         <div className="mt-7 flex flex-wrap gap-2"><Button variant="outline" onClick={async()=>{await navigator.clipboard.writeText(markdown);setCopied(true);setTimeout(()=>setCopied(false),2000);}}>{copied?<Check/>:<Clipboard/>}{copied?'Скопировано':'Скопировать'}</Button><Button variant="outline" onClick={()=>download(`urok-${plan.lesson.number}.md`,markdown,'text/markdown;charset=utf-8')}><Download/>Скачать Markdown</Button><Button variant="outline" onClick={()=>download(`urok-${plan.lesson.number}.json`,JSON.stringify(plan,null,2),'application/json;charset=utf-8')}><FileJson/>Скачать JSON</Button></div>
-       </div><div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_190px]"><article className="plan-prose min-w-0 pt-2"><Markdown content={markdown}/></article><aside className="hidden lg:block"><nav aria-label="Содержание плана" className="sticky top-8 mt-10"><p className="mb-3 text-xs font-bold uppercase text-muted-foreground">Содержание</p>{sections.map((s,i)=><a key={s} href={`#section-${i+1}`} className="mb-2 block text-sm text-foreground transition-colors hover:text-primary">{s}</a>)}</nav></aside></div>
+        </div><div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_190px]"><PlanResult plan={plan}/><aside className="hidden lg:block"><nav aria-label="Содержание плана" className="sticky top-8 mt-10"><p className="mb-3 text-xs font-bold uppercase text-muted-foreground">Содержание</p>{sections.map((s,i)=><a key={s} href={`#section-${i+1}`} className="mb-2 block text-sm text-foreground transition-colors hover:text-primary">{s}</a>)}</nav></aside></div>
     </main>}
     </div>
   </div>;
