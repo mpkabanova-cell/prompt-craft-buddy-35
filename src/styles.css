@@ -94,6 +94,7 @@
   .result-row h3 { font-size: 0.95rem; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
   .result-row h3 .result-rich p { margin: 0; }
   .result-subgroup { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem; }
+  .result-entry + .result-entry { margin-top: 1rem; }
   .result-row .result-list, .concept-grid .result-list { margin: 0; padding-left: 1.3rem; }
   .result-list { list-style: disc; }
   .result-list > li { padding-left: 0.1rem; margin-bottom: 0.3rem; }
