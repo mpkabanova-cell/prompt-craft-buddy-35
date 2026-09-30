@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
-import { ArrowLeft, Check, ChevronDown, Clipboard, Download, FileJson, Sparkles } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, Check, CheckCircle2, ChevronDown, Circle, Clipboard, Download, FileJson, LoaderCircle, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -66,14 +66,21 @@ function Index() {
   const [selected,setSelected]=useState<Lesson>();
   const [plan,setPlan]=useState<Plan>();
   const [loading,setLoading]=useState(false);
+  const [elapsed,setElapsed]=useState(0);
   const [error,setError]=useState(false);
   const [copied,setCopied]=useState(false);
   const ranked=useMemo(()=>rankLessonsByCurrentDate(new Date(),grade),[grade]);
   const available=Boolean(referenceAvailability[subject]?.[grade]);
   const markdown=plan ? planToMarkdown(plan) : '';
+  useEffect(() => {
+    if (!loading) return;
+    const started = Date.now();
+    const timer = window.setInterval(() => setElapsed(Math.floor((Date.now() - started) / 1000)), 1000);
+    return () => window.clearInterval(timer);
+  }, [loading]);
   async function createPlan() {
     if (!selected || !available || loading) return;
-    setLoading(true);setError(false);setPlan(undefined);
+    setElapsed(0);setLoading(true);setError(false);setPlan(undefined);
     try { const result=await generateLessonPlan({data:{lessonNumber:selected.lessonNumber}});setPlan(result); }
     catch (e) { console.error(e);setError(true); }
     finally {setLoading(false); }
@@ -96,7 +103,15 @@ function Index() {
       </section>
       {available && !ranked.isVacation && <section className="mt-10"><div className="mb-5 flex items-center justify-between gap-4"><div><h2 className="font-display text-xl font-bold">Актуально по плану</h2><p className="mt-1 text-sm text-muted-foreground">Темы текущей учебной недели</p></div><span className="text-xs text-muted-foreground">{ranked.current.length} уроков</span></div><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{ranked.current.map(l=><Button key={l.lessonNumber} variant="outline" onClick={()=>setSelected(l)} className={`h-auto min-h-28 w-full items-start justify-start whitespace-normal border bg-card p-5 text-left shadow-none transition-colors hover:border-primary/40 ${selected?.lessonNumber===l.lessonNumber ? 'border-primary bg-secondary' : ''}`}><div className="flex w-full flex-col items-start gap-2"><span className="text-xs font-semibold text-primary">УРОК {l.lessonNumber} <span className="text-muted-foreground">· {l.week} НЕДЕЛЯ</span></span><span className="line-clamp-2 text-sm font-semibold leading-relaxed text-foreground">{l.lessonTopic}</span></div></Button>)}</div></section>}
     </main>}
-     {loading && <main className="work-surface px-5 py-12 md:px-9"><div className="mb-8 flex items-center gap-3 text-primary"><Sparkles className="animate-pulse"/><span className="font-display text-xl font-bold">Формируем план урока…</span></div><Skeleton className="mb-4 h-10 w-3/4"/><Skeleton className="mb-10 h-5 w-1/2"/>{Array.from({length:5},(_,i)=><div key={i} className="mb-10"><Skeleton className="mb-5 h-7 w-1/3"/><Skeleton className="mb-3 h-4 w-full"/><Skeleton className="mb-3 h-4 w-5/6"/><Skeleton className="h-4 w-2/3"/></div>)}</main>}
+     {loading && <main className="work-surface px-5 py-12 md:px-9">
+       <div className="mb-8"><div className="flex items-center gap-3 text-primary"><Sparkles className="shrink-0 motion-safe:animate-pulse"/><h1 className="font-display text-xl font-bold">Формируем план урока…</h1></div><p className="mt-2 text-sm text-muted-foreground">Урок {selected?.lessonNumber} · {selected?.lessonTopic}</p></div>
+       <div className="mb-10 max-w-xl border-y border-border py-5" aria-label="Состояние формирования плана">
+         <div className="flex items-center gap-3 py-2 text-sm text-foreground"><CheckCircle2 className="size-5 shrink-0 text-primary" aria-hidden="true"/><span>Тема урока выбрана</span></div>
+         <div className="flex items-center gap-3 py-2 text-sm font-medium text-foreground" role="status" aria-live="polite"><LoaderCircle className="size-5 shrink-0 text-primary motion-safe:animate-spin" aria-hidden="true"/><span>{elapsed >= 45 ? 'Генерация продолжается, это занимает больше времени, чем обычно' : 'Ожидаем готовый план'}</span><span className="ml-auto shrink-0 tabular-nums text-muted-foreground" aria-label={`Прошло ${elapsed} секунд`}>{Math.floor(elapsed/60).toString().padStart(2,'0')}:{(elapsed%60).toString().padStart(2,'0')}</span></div>
+         <div className="flex items-center gap-3 py-2 text-sm text-muted-foreground"><Circle className="size-5 shrink-0" aria-hidden="true"/><span>Проверка структуры и длительности — после генерации</span></div>
+       </div>
+       <Skeleton className="mb-4 h-10 w-3/4"/><Skeleton className="mb-10 h-5 w-1/2"/>{Array.from({length:5},(_,i)=><div key={i} className="mb-10"><Skeleton className="mb-5 h-7 w-1/3"/><Skeleton className="mb-3 h-4 w-full"/><Skeleton className="mb-3 h-4 w-5/6"/><Skeleton className="h-4 w-2/3"/></div>)}
+     </main>}
      {plan && <main className="work-surface px-5 pb-20 pt-7 md:px-9"><Button variant="ghost" className="-ml-3 text-muted-foreground" onClick={()=>{setPlan(undefined);setCopied(false);}}><ArrowLeft/>Изменить урок</Button>
        <div className="mt-5 border-b pb-6"><h1 className="max-w-4xl font-display text-3xl font-bold leading-tight md:text-4xl">{plan.lesson.title}</h1><p className="mt-2 text-sm text-muted-foreground">Математика · 6 класс · {plan.lesson.lessonType} · {plan.lesson.section} · Урок {plan.lesson.number} · {plan.lesson.durationMinutes} мин</p>
         <div className="mt-7 flex flex-wrap gap-2"><Button variant="outline" onClick={async()=>{await navigator.clipboard.writeText(markdown);setCopied(true);setTimeout(()=>setCopied(false),2000);}}>{copied?<Check/>:<Clipboard/>}{copied?'Скопировано':'Скопировать'}</Button><Button variant="outline" onClick={()=>download(`urok-${plan.lesson.number}.md`,markdown,'text/markdown;charset=utf-8')}><Download/>Скачать Markdown</Button><Button variant="outline" onClick={()=>download(`urok-${plan.lesson.number}.json`,JSON.stringify(plan,null,2),'application/json;charset=utf-8')}><FileJson/>Скачать JSON</Button></div>
