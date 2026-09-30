@@ -30,7 +30,7 @@ export function validateLessonPlan(p: Plan, lesson: Lesson): string[] {
     if (p.lessonStages.reduce((sum,stage) => sum+stage.durationMinutes,0) !== lesson.hours*45) errors.push('Сумма времени не совпадает');
   }
   if (!p.goal?.content?.includes(lesson.goal)) errors.push('Цель не совпадает со справочником');
-  if (p.lesson.subject !== 'Математика' || p.lesson.grade !== '6 класс' || p.lesson.quarter !== lesson.quarter || p.lesson.week !== lesson.week) errors.push('Метаданные урока не совпадают со справочником');
+  if (p.lesson.subject !== 'Математика' || p.lesson.grade !== '6 класс' || Number(p.lesson.quarter) !== lesson.quarter || Number(p.lesson.week) !== lesson.week) errors.push('Метаданные урока не совпадают со справочником');
   if (!p.lessonContent?.content || !p.homework?.content) errors.push('Нет содержания или домашнего задания');
   if (!p.objectives?.content || !p.plannedResults?.table || !p.keyConcepts?.table || !p.prerequisites?.content) errors.push('Не хватает обязательных разделов');
   if (p.keyConcepts?.table && (!p.keyConcepts.table.includes('Основные понятия') || !p.keyConcepts.table.includes('Новые понятия') || lesson.keyConcepts.some(c => !p.keyConcepts.table.toLocaleLowerCase('ru').includes(c.toLocaleLowerCase('ru'))) || lesson.newConcepts.some(c => !p.keyConcepts.table.toLocaleLowerCase('ru').includes(c.toLocaleLowerCase('ru'))))) errors.push('Понятия не соответствуют справочнику');
