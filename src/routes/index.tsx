@@ -79,7 +79,7 @@ function Index() {
   }
   return <div className="app-frame min-h-screen bg-background">
     <div className="app-shell">
-    <header className="shell-steps" aria-label="Этапы работы"><span className="step-complete"><span className="step-dot">✓</span>Выбор урока</span><span className={plan || loading ? 'step-active' : 'step-future'}><span className="step-dot">◔</span>План урока</span><span className="step-future"><span className="step-dot">◔</span>Материалы для урока</span></header>
+    <header className="shell-steps" aria-label="Этапы работы"><span className="step-complete"><span className="step-dot">✓</span>Выбор урока</span><span className="step-line" aria-hidden="true"></span><span className={plan || loading ? 'step-active' : 'step-future'}><span className="step-dot">2</span>План урока</span><span className="step-line" aria-hidden="true"></span><span className="step-future"><span className="step-dot">3</span>Материалы для урока</span></header>
     {!plan && !loading && <main className="work-surface px-5 pb-16 pt-9 md:px-9 md:pt-11">
       <div className="max-w-3xl"><h1 className="font-display text-3xl font-bold leading-tight md:text-4xl">Создать план урока</h1><p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">Выберите урок из тематического планирования — структура и содержание плана будут подготовлены автоматически.</p></div>
       <section className="mt-9 border-y border-border py-7" aria-label="Выбор урока">
