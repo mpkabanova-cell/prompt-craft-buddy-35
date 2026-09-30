@@ -27,7 +27,8 @@ export function createLessonGateway(apiKey: string) {
     getError: () => gatewayError,
     stream: (system: string, user: string) => streamText({
       model: provider.responses('openai/gpt-6-astra'),
-      messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+      instructions: system,
+      messages: [{ role: 'user', content: user }],
       providerOptions: { openai: {
         forceReasoning: true,
         reasoningEffort: 'medium',
