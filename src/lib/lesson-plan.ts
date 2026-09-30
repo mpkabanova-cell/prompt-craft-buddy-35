@@ -1,4 +1,5 @@
 import type { Lesson } from './lesson-data';
+import katex from 'katex';
 
 export type Stage = { id: string; durationMinutes: number; content: string };
 export type Plan = {
@@ -26,6 +27,7 @@ export function validateLessonPlan(p: Plan, lesson: Lesson): string[] {
       if (!stage.content?.includes(`### ${i+1}. ${schema.names[i]}`)) errors.push(`Неверное название этапа ${i+1}`);
        if (!Number.isInteger(stage.durationMinutes) || stage.durationMinutes <= 0 || stage.durationMinutes !== schema.minutes[i]) errors.push(`Неверная длительность этапа ${i+1}`);
       if (!stage.content?.includes('**Деятельность учителя**') || !stage.content?.includes('**Деятельность учащихся**') || !stage.content?.includes('**Результат этапа:**')) errors.push(`Неполный этап ${i+1}`);
+      if (stage.content && (!/^### \d+\.[^\n]+\n\s*\*\*Деятельность учителя\*\*/m.test(stage.content) || !/^\*\*Деятельность учащихся\*\*/m.test(stage.content) || !/^\*\*Результат этапа:\*\*/m.test(stage.content) || /[^\n]\s+-\s+(?:Просит|Предлагает|Помогает|Организует|Задаёт|Выделяют|Формулируют|Вычисляют|Раскладывают)\b/.test(stage.content))) errors.push(`Нарушено оформление этапа ${i+1}`);
     });
      if (p.lessonStages.reduce((sum,stage) => sum+stage.durationMinutes,0) !== 45) errors.push('Сумма времени этапов должна быть ровно 45 минут');
   }
@@ -40,6 +42,15 @@ export function validateLessonPlan(p: Plan, lesson: Lesson): string[] {
   if (/\b\d+\/\d+\b/.test(all)) errors.push('Дроби нужно записывать через LaTeX');
   if ('reflection' in p) errors.push('Отдельная рефлексия запрещена');
   if (lesson.newConcepts.length === 0 && p.keyConcepts?.table && !p.keyConcepts.table.includes('—')) errors.push('Новые понятия должны быть пустыми');
+  const markdown = planToMarkdown(p);
+  const mathParts = [...markdown.matchAll(/\\\(([\s\S]*?)\\\)|\\\[([\s\S]*?)\\\]|\$\$([\s\S]*?)\$\$|(?<!\$)\$([^$\n]+)\$(?!\$)/g)];
+  let outsideMath = markdown;
+  for (const match of [...mathParts].reverse()) outsideMath = outsideMath.slice(0, match.index) + ' '.repeat(match[0].length) + outsideMath.slice(match.index + match[0].length);
+  if (/\\(?:frac|dfrac|tfrac|cdot|times|div|operatorname|sqrt|left|right|text|begin|end)\b|(?<!\$)\$(?!\$)|\\[()[\]]/.test(outsideMath)) errors.push('Математические формулы вне LaTeX-разметки');
+  if (mathParts.some(match => {
+    try { katex.renderToString(match[1] ?? match[2] ?? match[3] ?? match[4] ?? '', { throwOnError: true }); return false; }
+    catch { return true; }
+  })) errors.push('Некорректная математическая формула');
   return errors;
 }
 export function planToMarkdown(p: Plan) {

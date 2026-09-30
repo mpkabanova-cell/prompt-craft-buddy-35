@@ -14,6 +14,7 @@
   --color-destructive: var(--destructive); --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring);
   --color-sidebar: var(--sidebar); --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-page-surround: var(--page-surround);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
@@ -38,8 +39,8 @@
   button, input { font: inherit; }
 }
 @layer components {
-  .app-frame { padding: 42px 24px 32px; }
-  .app-shell { width: min(1400px, 100%); margin: 0 auto; background: var(--color-background); padding: 16px 18px 0; min-height: calc(100vh - 74px); }
+  .app-frame { padding: 64px 45px 32px; }
+  .app-shell { width: min(1500px, 100%); margin: 0 auto; background: var(--color-background); padding: 16px 24px 0; min-height: calc(100vh - 96px); }
   .shell-steps { display: flex; align-items: center; gap: 16px; min-height: 70px; padding: 0 14px; font-size: 14px; flex-wrap: wrap; }
   .shell-steps > span:not(.step-line) { display: inline-flex; align-items: center; gap: 9px; }
   .step-line { width: 44px; height: 1.5px; border-radius: 1px; background: var(--color-border); }
@@ -73,5 +74,8 @@
   .step-line { display: none; }
   .step-dot { width: 22px; height: 22px; font-size: 12px; }
   .plan-prose table { display: block; overflow-x: auto; }
+}
+@media (min-width: 721px) and (max-width: 1000px) {
+  .app-frame { padding: 32px 22px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

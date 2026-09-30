@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowLeft, Check, CheckCircle2, ChevronDown, Circle, Clipboard, Download, FileJson, LoaderCircle, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -66,26 +66,19 @@ function Index() {
   const [selected,setSelected]=useState<Lesson>();
   const [plan,setPlan]=useState<Plan>();
   const [loading,setLoading]=useState(false);
-  const [elapsed,setElapsed]=useState(0);
   const [error,setError]=useState(false);
   const [copied,setCopied]=useState(false);
   const ranked=useMemo(()=>rankLessonsByCurrentDate(new Date(),grade),[grade]);
   const available=Boolean(referenceAvailability[subject]?.[grade]);
   const markdown=plan ? planToMarkdown(plan) : '';
-  useEffect(() => {
-    if (!loading) return;
-    const started = Date.now();
-    const timer = window.setInterval(() => setElapsed(Math.floor((Date.now() - started) / 1000)), 1000);
-    return () => window.clearInterval(timer);
-  }, [loading]);
   async function createPlan() {
     if (!selected || !available || loading) return;
-    setElapsed(0);setLoading(true);setError(false);setPlan(undefined);
+    setLoading(true);setError(false);setPlan(undefined);
     try { const result=await generateLessonPlan({data:{lessonNumber:selected.lessonNumber}});setPlan(result); }
     catch (e) { console.error(e);setError(true); }
     finally {setLoading(false); }
   }
-  return <div className="app-frame min-h-screen bg-background">
+  return <div className="app-frame min-h-screen bg-page-surround">
     <div className="app-shell">
     <header className="shell-steps" aria-label="Этапы работы"><span className="step-complete"><span className="step-dot">✓</span>Выбор урока</span><span className="step-line" aria-hidden="true"></span><span className={plan || loading ? 'step-active' : 'step-future'}><span className="step-dot">2</span>План урока</span><span className="step-line" aria-hidden="true"></span><span className="step-future"><span className="step-dot">3</span>Материалы для урока</span></header>
     {!plan && !loading && <main className="work-surface px-5 pb-16 pt-9 md:px-9 md:pt-11">
@@ -107,8 +100,8 @@ function Index() {
        <div className="mb-8"><div className="flex items-center gap-3 text-primary"><Sparkles className="shrink-0 motion-safe:animate-pulse"/><h1 className="font-display text-xl font-bold">Формируем план урока…</h1></div><p className="mt-2 text-sm text-muted-foreground">Урок {selected?.lessonNumber} · {selected?.lessonTopic}</p></div>
        <div className="mb-10 max-w-xl border-y border-border py-5" aria-label="Состояние формирования плана">
          <div className="flex items-center gap-3 py-2 text-sm text-foreground"><CheckCircle2 className="size-5 shrink-0 text-primary" aria-hidden="true"/><span>Тема урока выбрана</span></div>
-         <div className="flex items-center gap-3 py-2 text-sm font-medium text-foreground" role="status" aria-live="polite"><LoaderCircle className="size-5 shrink-0 text-primary motion-safe:animate-spin" aria-hidden="true"/><span>{elapsed >= 45 ? 'Генерация продолжается, это занимает больше времени, чем обычно' : 'Ожидаем готовый план'}</span><span className="ml-auto shrink-0 tabular-nums text-muted-foreground" aria-label={`Прошло ${elapsed} секунд`}>{Math.floor(elapsed/60).toString().padStart(2,'0')}:{(elapsed%60).toString().padStart(2,'0')}</span></div>
-         <div className="flex items-center gap-3 py-2 text-sm text-muted-foreground"><Circle className="size-5 shrink-0" aria-hidden="true"/><span>Проверка структуры и длительности — после генерации</span></div>
+         <div className="flex items-center gap-3 py-2 text-sm font-medium text-foreground" role="status" aria-live="polite"><LoaderCircle className="size-5 shrink-0 text-primary motion-safe:animate-spin" aria-hidden="true"/><span>Составляем план и задания</span></div>
+         <div className="flex items-center gap-3 py-2 text-sm text-muted-foreground"><Circle className="size-5 shrink-0" aria-hidden="true"/><span>Далее — проверка структуры и 45 минут</span></div>
        </div>
        <Skeleton className="mb-4 h-10 w-3/4"/><Skeleton className="mb-10 h-5 w-1/2"/>{Array.from({length:5},(_,i)=><div key={i} className="mb-10"><Skeleton className="mb-5 h-7 w-1/3"/><Skeleton className="mb-3 h-4 w-full"/><Skeleton className="mb-3 h-4 w-5/6"/><Skeleton className="h-4 w-2/3"/></div>)}
      </main>}
