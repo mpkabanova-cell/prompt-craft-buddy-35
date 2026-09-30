@@ -30,7 +30,17 @@ function rowsFromTable(text: string) {
 }
 
 function ResultList({ text }: { text: string }) {
-  const items = text.split(/\s*;\s*(?![^$]*\$)/).map(item => item.trim()).filter(Boolean);
+  const items: string[] = [];
+  let part = '';
+  let mathEnd = '';
+  for (let i = 0; i < text.length; i++) {
+    if (!mathEnd && text.startsWith('\\(', i)) mathEnd = '\\)';
+    else if (!mathEnd && text.startsWith('\\[', i)) mathEnd = '\\]';
+    else if (mathEnd && text.startsWith(mathEnd, i)) mathEnd = '';
+    else if (!mathEnd && text[i] === ';') { if (part.trim()) items.push(part.trim()); part = ''; continue; }
+    part += text[i];
+  }
+  if (part.trim()) items.push(part.trim());
   return items.length > 1 ? <ul className="result-list">{items.map((item, i) => <li key={i}><RichText>{item}</RichText></li>)}</ul> : <RichText>{text}</RichText>;
 }
 
@@ -66,7 +76,7 @@ export function PlanResult({ plan }: { plan: Plan }) {
     <ResultSection id="section-3" title="Планируемые результаты">
       {resultRows.length ? <div className="result-rows">{resultRows.map((row, i) => {
         const metacognitive = row[0].replace(/\*\*/g, '').match(/^Метапредметные\s*[—–-]\s*(.+)$/i);
-        return <div className="result-row" key={i}><h3>{metacognitive ? (resultRows.slice(0, i).some(previous => /^Метапредметные/i.test(previous[0].replace(/\*\*/g, ''))) ? null : 'Метапредметные') : <RichText>{row[0]}</RichText>}</h3><div>{metacognitive && <h4 className="result-subgroup">{metacognitive[1]}</h4>}<ResultList text={row.slice(1).join(' | ')} /></div></div>;
+        return <div className="result-row" key={i}><h3>{metacognitive ? (resultRows.slice(0, i).some(previous => /^Метапредметные/i.test(previous[0].replace(/\*\*/g, ''))) ? null : 'Метапредметные') : row[0].replace(/\*\*/g, '')}</h3><div>{metacognitive && <h4 className="result-subgroup">{metacognitive[1]}</h4>}<ResultList text={row.slice(1).join(' | ')} /></div></div>;
       })}</div> : <RichText>{plan.plannedResults.table}</RichText>}
     </ResultSection>
     <ResultSection id="section-4" title="Понятия урока"><div className="concept-grid"><div><h3>Основные понятия</h3><ResultList text={concepts || '—'} /></div><div><h3>Новые понятия</h3><ResultList text={newConcepts} /></div></div></ResultSection>
