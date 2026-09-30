@@ -69,7 +69,9 @@
   .app-frame { padding: 0; }
   .app-shell { padding: 10px 10px 0; min-height: 100vh; }
   .work-surface { border-radius: 16px 16px 0 0; }
-  .shell-steps { gap: 10px 18px; padding: 10px 8px; font-size: 12px; }
+  .shell-steps { gap: 8px 20px; padding: 12px 8px 6px; font-size: 12px; }
+  .step-line { display: none; }
+  .step-dot { width: 22px; height: 22px; font-size: 12px; }
   .plan-prose table { display: block; overflow-x: auto; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
