@@ -46,7 +46,7 @@ function TopicPicker({value, onChange, ranked}: {value:Lesson|undefined;onChange
           {([['Актуально сейчас',ranked.current],['Темы уроков',ranked.all]] as const).map(([heading,items]) => items.length > 0 && <CommandGroup key={heading} heading={heading}>
             {items.map(l => <CommandItem key={l.lessonNumber} value={`${l.lessonNumber} ${l.lessonTopic} ${l.unitTopic}`} onSelect={() => {onChange(l);setOpen(false);}} className="flex items-start gap-3 py-3 cursor-pointer">
               <span className="flex h-7 w-8 shrink-0 items-center justify-center rounded bg-secondary text-xs font-semibold text-secondary-foreground">{l.lessonNumber}</span>
-              <span className="min-w-0 flex-1"><span className="block text-sm leading-snug">{l.lessonTopic}</span><span className="mt-1 block text-xs text-muted-foreground">{l.unitTopic} · {l.quarter} четверть · {l.week} неделя</span></span>
+               <span className="min-w-0 flex-1"><span className="block text-sm leading-snug">{l.lessonTopic}</span><span className="mt-1 block text-xs text-muted-foreground">{l.unitTopic} · {l.lessonType}</span></span>
               {value?.lessonNumber===l.lessonNumber && <Check className="shrink-0 text-primary" />}
             </CommandItem>)}
           </CommandGroup>)}
