@@ -14,8 +14,7 @@ function RichText({ children, className = '', definitions = false }: { children:
     p: ({ children: contents }) => {
       const first = Array.isArray(contents) ? contents[0] : contents;
       const label = isValidElement<{ children?: ReactNode }>(first) && first.type === 'strong' ? first.props.children : null;
-      const trailing = Array.isArray(contents) ? contents.slice(1) : [];
-      const isDefinition = definitions && typeof label === 'string' && /:$/.test(label.trim()) && trailing.every(item => typeof item === 'string' && !item.trim());
+      const isDefinition = definitions && typeof label === 'string' && /^(?:Определение|Правило|Важно|Запомните)\s*:?$/i.test(label.trim());
       return <p className={isDefinition ? 'result-definition' : undefined}>{contents}</p>;
     },
   }}>{normalized}</ReactMarkdown></div>;
