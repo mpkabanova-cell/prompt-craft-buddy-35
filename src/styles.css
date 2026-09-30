@@ -40,14 +40,15 @@
 @layer components {
   .app-frame { padding: 42px 24px 32px; }
   .app-shell { width: min(1400px, 100%); margin: 0 auto; background: var(--color-background); padding: 16px 18px 0; min-height: calc(100vh - 74px); }
-  .shell-steps { display: flex; align-items: center; gap: 28px; min-height: 70px; padding: 0 14px; font-size: 14px; flex-wrap: wrap; }
-  .shell-steps > span:not(.step-line) { display: inline-flex; align-items: center; gap: 8px; }
+  .shell-steps { display: flex; align-items: center; gap: 16px; min-height: 70px; padding: 0 14px; font-size: 14px; flex-wrap: wrap; }
+  .shell-steps > span:not(.step-line) { display: inline-flex; align-items: center; gap: 9px; }
+  .step-line { width: 44px; height: 1.5px; border-radius: 1px; background: var(--color-border); }
   .step-active { color: var(--color-primary); font-weight: 700; }
   .step-complete { color: var(--color-foreground); font-weight: 600; }
   .step-future { color: var(--color-muted-foreground); }
-  .step-dot { display: inline-grid; width: 18px; height: 18px; border-radius: 50%; place-items: center; color: var(--color-muted-foreground); border: 1px solid currentColor; font-size: 13px; font-weight: 700; }
-  .step-active .step-dot { color: var(--color-primary); }
-  .step-complete .step-dot { color: var(--color-foreground); }
+  .step-dot { display: inline-grid; width: 26px; height: 26px; border-radius: 50%; place-items: center; border: 1.5px solid var(--color-border); background: var(--color-card); color: var(--color-muted-foreground); font-size: 13px; font-weight: 700; }
+  .step-complete .step-dot { background: var(--color-foreground); border-color: var(--color-foreground); color: var(--color-background); }
+  .step-active .step-dot { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-foreground); }
   .work-surface { min-height: 680px; background: var(--color-card); border-radius: 20px 20px 0 0; }
   .plan-prose { line-height: 1.6; font-size: 0.875rem; overflow-wrap: anywhere; }
   .plan-prose h1 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; line-height: 1.3; margin: 1.4rem 0 0.6rem; }
