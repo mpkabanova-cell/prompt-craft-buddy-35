@@ -31,6 +31,7 @@ export async function generatePlan(lessonNumber: number): Promise<Plan> {
     }
     catch (error) { const pos = Number(String(error).match(/position (\d+)/)?.[1]); console.warn('Invalid response', attempt, raw.length, String(error), Number.isFinite(pos) ? cleaned.slice(Math.max(0,pos-50),pos+50) : ''); correction = 'Ответ не был корректным JSON или оборвался. Все обратные слэши в LaTeX должны быть удвоены для корректного JSON. Верни один законченный объект.'; continue; }
     if (plan && typeof plan === 'object') plan.lesson = {...(plan.lesson ?? {}), subject:'Математика', grade:'6 класс', quarter:lesson.quarter, week:lesson.week} as Plan['lesson'];
+    if (plan && typeof plan === 'object') plan = JSON.parse(JSON.stringify(plan, (_k, v) => typeof v === 'string' ? v.replace(/^ {2,}(?=\d+\.\s|\*\*)/gm, '').replace(/²/g, '^2').replace(/³/g, '^3') : v)) as Plan;
     const errors = [...validateLessonPlan(plan,lesson), ...checkAgainstContext(plan, lesson, digests)];
     if (errors.length === 0) { await saveDigest(makeDigest(plan, lesson.lessonNumber)); return plan; }
     console.warn('Validation', attempt, errors);
