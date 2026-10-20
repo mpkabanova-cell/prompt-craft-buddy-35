@@ -96,7 +96,7 @@
   .result-subgroup { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem; }
   .result-entry + .result-entry { margin-top: 1rem; }
   .result-row .result-list, .concept-grid .result-list { margin: 0; padding-left: 1.3rem; }
-  .result-list { list-style: disc; }
+  .result-list { list-style: disc; padding-left: 1.45rem; }
   .result-list > li { padding-left: 0.1rem; margin-bottom: 0.3rem; }
   .concept-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; }
   .concept-grid > div { min-width: 0; padding: 1rem 1.15rem; overflow-wrap: anywhere; }
