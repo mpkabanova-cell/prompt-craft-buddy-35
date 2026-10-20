@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Check, CheckCircle2, ChevronDown, Circle, Clipboard, Download, FileJson, LoaderCircle, Sparkles } from 'lucide-react';
+import { ArrowLeft, Check, CheckCircle2, ChevronDown, Circle, FileText, Table2, Clipboard, Download, FileJson, LoaderCircle, Sparkles } from 'lucide-react';
 import { PlanResult } from '@/components/plan-result';
+import { TechCard, techCardWordFile } from '@/components/tech-card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -47,8 +48,8 @@ function TopicPicker({value, onChange, ranked}: {value:Lesson|undefined;onChange
     </PopoverContent>
   </Popover>;
 }
-function download(name:string, content:string, type:string) {
-  const url=URL.createObjectURL(new Blob([content],{type}));
+function download(name:string, content:string|Blob, type=''):void {
+  const url=URL.createObjectURL(typeof content==='string' ? new Blob([content],{type}) : content);
   const anchor=document.createElement('a');anchor.href=url;anchor.download=name;anchor.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
@@ -60,19 +61,20 @@ function Index() {
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState(false);
   const [copied,setCopied]=useState(false);
+  const [mode,setMode]=useState<'plan'|'card'>('plan');
   const ranked=useMemo(()=>rankLessonsByCurrentDate(new Date(),grade),[grade]);
   const available=Boolean(referenceAvailability[subject]?.[grade]);
   const markdown=plan ? planToMarkdown(plan) : '';
   async function createPlan() {
     if (!selected || !available || loading) return;
-    setLoading(true);setError(false);setPlan(undefined);
+    setLoading(true);setError(false);setPlan(undefined);setMode('plan');
     try { const result=await generateLessonPlan({data:{lessonNumber:selected.lessonNumber}});setPlan(result); }
     catch (e) { console.error(e);setError(true); }
     finally {setLoading(false); }
   }
   return <div className="app-frame min-h-screen bg-page-surround">
     <div className="app-shell">
-    <header className="shell-steps" aria-label="Этапы работы"><span className="step-complete"><span className="step-dot">✓</span>Выбор урока</span><span className="step-line" aria-hidden="true"></span><span className={plan || loading ? 'step-active' : 'step-future'}><span className="step-dot">2</span>План урока</span><span className="step-line" aria-hidden="true"></span><span className="step-future"><span className="step-dot">3</span>Материалы для урока</span></header>
+    <header className="shell-steps" aria-label="Этапы работы"><span className="step-complete"><span className="step-dot">✓</span>Выбор урока</span><span className="step-line" aria-hidden="true"></span><span className={plan || loading ? 'step-active' : 'step-future'}><span className="step-dot">2</span>План урока</span><span className="step-line" aria-hidden="true"></span><span className={mode==='card' && plan ? 'step-active' : 'step-future'}><span className="step-dot">3</span>Материалы для урока</span></header>
     {!plan && !loading && <main className="work-surface px-5 pb-16 pt-9 md:px-9 md:pt-11">
       <div className="max-w-3xl"><div className="flex items-center gap-4"><img src={logoMark} alt="" width={52} height={52} className="h-[52px] w-[52px] shrink-0" /><h1 className="font-display text-3xl font-bold leading-tight md:text-4xl">Создать план урока</h1></div><p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">Выберите урок из тематического планирования — структура и содержание плана будут подготовлены автоматически.</p></div>
       <section className="mt-9 border-y border-border py-7" aria-label="Выбор урока">
@@ -99,8 +101,9 @@ function Index() {
      </main>}
       {plan && <main className="work-surface px-5 pb-20 pt-7 md:px-9"><Button variant="ghost" className="-ml-3 text-muted-foreground" onClick={()=>{setPlan(undefined);setCopied(false);}}><ArrowLeft/>Изменить урок</Button>
         <div className="mt-5 border-b pb-6"><h1 className="max-w-4xl font-display text-3xl font-bold leading-tight md:text-4xl">{selected ? lessonDisplayTitle(selected) : plan.lesson.title}</h1><p className="mt-2 text-sm text-muted-foreground">Математика · 6 класс · {plan.lesson.lessonType} · {plan.lesson.section} · Урок {plan.lesson.number} · {plan.lesson.durationMinutes} мин</p>
-        <div className="mt-7 flex flex-wrap gap-2"><Button variant="outline" onClick={async()=>{await navigator.clipboard.writeText(markdown);setCopied(true);setTimeout(()=>setCopied(false),2000);}}>{copied?<Check/>:<Clipboard/>}{copied?'Скопировано':'Скопировать'}</Button><Button variant="outline" onClick={()=>download(`urok-${plan.lesson.number}.md`,markdown,'text/markdown;charset=utf-8')}><Download/>Скачать Markdown</Button><Button variant="outline" onClick={()=>download(`urok-${plan.lesson.number}.json`,JSON.stringify(plan,null,2),'application/json;charset=utf-8')}><FileJson/>Скачать JSON</Button></div>
-        </div><div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_190px]"><PlanResult plan={plan}/><aside className="hidden lg:block"><nav aria-label="Содержание плана" className="sticky top-8 mt-10"><p className="mb-3 text-xs font-bold uppercase text-muted-foreground">Содержание</p>{sections.map((s,i)=><a key={s} href={`#section-${i+1}`} className="mb-2 block text-sm text-foreground transition-colors hover:text-primary">{s}</a>)}</nav></aside></div>
+        <div className="mt-7 inline-flex rounded-md border bg-card p-1" role="tablist" aria-label="Режим просмотра"><Button role="tab" aria-selected={mode==='plan'} size="sm" variant={mode==='plan'?'default':'ghost'} onClick={()=>setMode('plan')}><FileText/>План урока</Button><Button role="tab" aria-selected={mode==='card'} size="sm" variant={mode==='card'?'default':'ghost'} onClick={()=>setMode('card')}><Table2/>Технологическая карта</Button></div>
+         {mode==='plan' ? <div className="mt-7 flex flex-wrap gap-2"><Button variant="outline" onClick={async()=>{await navigator.clipboard.writeText(markdown);setCopied(true);setTimeout(()=>setCopied(false),2000);}}>{copied?<Check/>:<Clipboard/>}{copied?'Скопировано':'Скопировать'}</Button><Button variant="outline" onClick={()=>download(`urok-${plan.lesson.number}.md`,markdown,'text/markdown;charset=utf-8')}><Download/>Скачать Markdown</Button><Button variant="outline" onClick={()=>download(`urok-${plan.lesson.number}.json`,JSON.stringify(plan,null,2),'application/json;charset=utf-8')}><FileJson/>Скачать JSON</Button></div> : <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" onClick={async()=>download(`tekhkarta-${plan.lesson.number}.doc`,await techCardWordFile(plan))}><Download/>Скачать технологическую карту (Word)</Button></div>}
+        </div>{mode==='card' ? <div className="mt-6"><TechCard plan={plan}/></div> : <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_190px]"><PlanResult plan={plan}/><aside className="hidden lg:block"><nav aria-label="Содержание плана" className="sticky top-8 mt-10"><p className="mb-3 text-xs font-bold uppercase text-muted-foreground">Содержание</p>{sections.map((s,i)=><a key={s} href={`#section-${i+1}`} className="mb-2 block text-sm text-foreground transition-colors hover:text-primary">{s}</a>)}</nav></aside></div>}
     </main>}
     </div>
   </div>;
