@@ -5,11 +5,11 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { normalizeMarkdown, type Plan } from '@/lib/lesson-plan';
 
-function RichText({ children, className = '', definitions = false }: { children: string; className?: string; definitions?: boolean }) {
+export function RichText({ children, className = '', definitions = false, mathml = false }: { children: string; className?: string; definitions?: boolean; mathml?: boolean }) {
   const normalized = normalizeMarkdown(children)
     .replace(/\\\(([\s\S]*?)\\\)/g, (_match, math: string) => `$${math.replace(/\\frac(?=\s*\{)/g, '\\dfrac')}$`)
     .replace(/\\\[([\s\S]*?)\\\]/g, (_match, math: string) => `$$\n${math}\n$$`);
-  return <div className={`result-rich ${className}`}><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} skipHtml components={{
+  return <div className={`result-rich ${className}`}><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[[rehypeKatex, mathml ? { output: 'mathml' } : {}]]} skipHtml components={{
     table: ({ children: contents }) => <div className="result-table-scroll"><table>{contents}</table></div>,
     p: ({ children: contents }) => {
       const first = Array.isArray(contents) ? contents[0] : contents;
@@ -20,17 +20,17 @@ function RichText({ children, className = '', definitions = false }: { children:
   }}>{normalized}</ReactMarkdown></div>;
 }
 
-function withoutTitle(text: string, title: string) {
+export function withoutTitle(text: string, title: string) {
   return text.replace(new RegExp(`^\\s*#{1,4}\\s*${title}\\s*\\n?`, 'i'), '').trim();
 }
 
-function rowsFromTable(text: string) {
+export function rowsFromTable(text: string) {
   return text.split('\n').filter(line => /^\s*\|/.test(line))
     .map(line => line.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map(cell => cell.trim()))
     .filter(row => row.length >= 2 && !row.every(cell => /^:?-{2,}:?$/.test(cell)));
 }
 
-function ResultList({ text }: { text: string }) {
+export function ResultList({ text }: { text: string }) {
   const items: string[] = [];
   let part = '';
   let mathEnd = '';
