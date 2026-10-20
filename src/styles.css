@@ -131,3 +131,17 @@
   .result-section > h2 { font-size: 1.25rem; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+@layer components {
+  .tech-card h2 { font-size: 1.05rem; font-weight: 750; text-transform: uppercase; letter-spacing: .03em; margin: 1.8rem 0 .7rem; color: var(--color-primary); }
+  .tech-card table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  .tech-card th, .tech-card td { border: 1px solid var(--color-border); padding: .6rem .75rem; vertical-align: top; text-align: left; }
+  .tc-meta th { width: 30%; background: var(--color-secondary); font-weight: 600; }
+  .tc-stages thead th { background: var(--color-secondary); font-weight: 650; }
+  .tc-stages td:first-child { width: 16%; }
+  .tc-scroll { overflow-x: auto; margin-top: 1rem; }
+  .tc-stages { min-width: 760px; }
+  .tc-min { margin-top: .4rem; font-size: .8rem; color: var(--color-primary); font-weight: 600; }
+  .tc-blank { color: var(--color-muted-foreground); font-style: italic; }
+  .tc-result + .tc-result { margin-top: .5rem; }
+}
